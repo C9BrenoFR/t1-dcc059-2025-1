@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     nome_arquivo = "../instancias/" + nome_arquivo;
     std::cout << "Arquivo passado: " << nome_arquivo << std::endl;
 
-    string regras = "0 1 1";
+    string regras = "1 1 1";
     string no_a = "a 1";
     string no_b = "b 2";
     string no_c = "c 3";

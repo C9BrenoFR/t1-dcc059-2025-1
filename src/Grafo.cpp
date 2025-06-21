@@ -3,6 +3,7 @@
 #include "Aresta.h"
 #include <iostream>
 #include <vector>
+#include <stack>
 
 using namespace std;
 
@@ -41,18 +42,143 @@ int Grafo::getOrdem()
     return ordem;
 }
 
+No *Grafo::getNoPorId(char id)
+{
+    for (No *no : lista_adj)
+    {
+        if (no->getId() == id)
+            return no;
+    }
+    return nullptr;
+}
+
 vector<char> Grafo::fecho_transitivo_direto(int id_no)
 {
-    cout << "Metodo nao implementado" << endl;
-    return {};
+    char id_char = id_no;
+    No *inicio = getNoPorId(id_char);
+    if (!inicio)
+        return {};
+
+    vector<char> visitados;
+    stack<No *> pilha;
+    pilha.push(inicio);
+
+    while (!pilha.empty())
+    {
+        No *atual = pilha.top();
+        pilha.pop();
+
+        bool ja_visitado = false;
+        for (char v : visitados)
+        {
+            if (v == atual->getId())
+            {
+                ja_visitado = true;
+                break;
+            }
+        }
+        if (ja_visitado)
+            continue;
+
+        visitados.push_back(atual->getId());
+
+        for (Aresta *aresta : atual->getArestas())
+        {
+            No *proximo = getNoPorId(aresta->getIdNoAlvo());
+            if (proximo)
+            {
+                bool visitado = false;
+                for (char v : visitados)
+                {
+                    if (v == proximo->getId())
+                    {
+                        visitado = true;
+                        break;
+                    }
+                }
+                if (!visitado)
+                {
+                    pilha.push(proximo);
+                }
+            }
+        }
+    }
+
+    vector<char> resultado;
+    for (char c : visitados)
+    {
+        if (c != id_char)
+        {
+            resultado.push_back(c);
+        }
+    }
+    return resultado;
 }
 
 vector<char> Grafo::fecho_transitivo_indireto(int id_no)
 {
-    std::cout << "Metodo nao implementado" << endl;
-    return {};
-}
+    char id_char = id_no;
+    No *alvo = getNoPorId(id_char);
+    if (!alvo)
+        return {};
 
+    vector<char> visitados;
+    stack<No *> pilha;
+    pilha.push(alvo);
+
+    while (!pilha.empty())
+    {
+        No *atual = pilha.top();
+        pilha.pop();
+
+        bool ja_visitado = false;
+        for (char v : visitados)
+        {
+            if (v == atual->getId())
+            {
+                ja_visitado = true;
+                break;
+            }
+        }
+        if (ja_visitado)
+            continue;
+
+        visitados.push_back(atual->getId());
+
+        for (No *no : lista_adj)
+        {
+            for (Aresta *aresta : no->getArestas())
+            {
+                if (aresta->getIdNoAlvo() == atual->getId())
+                {
+                    bool visitado = false;
+                    for (char v : visitados)
+                    {
+                        if (v == no->getId())
+                        {
+                            visitado = true;
+                            break;
+                        }
+                    }
+                    if (!visitado)
+                    {
+                        pilha.push(no);
+                    }
+                }
+            }
+        }
+    }
+
+    vector<char> resultado;
+    for (char c : visitados)
+    {
+        if (c != id_char)
+        {
+            resultado.push_back(c);
+        }
+    }
+    return resultado;
+}
 vector<char> Grafo::caminho_minimo_dijkstra(int id_no_a, int id_no_b)
 {
     std::cout << "Metodo nao implementado" << endl;

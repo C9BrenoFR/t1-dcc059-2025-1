@@ -25,12 +25,27 @@ void Gerenciador::comandos(Grafo *grafo)
 
         char id_no = get_id_entrada();
         vector<char> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
-        cout << "Metodo de impressao em tela nao implementado" << endl
-             << endl;
+
+        cout << "Fecho transitivo direto do nó " << id_no << ": ";
+        if (fecho_transitivo_direto.empty())
+        {
+            cout << "Nenhum nó alcançável." << endl;
+        }
+        else
+        {
+            for (char c : fecho_transitivo_direto)
+                cout << c << " ";
+            cout << endl;
+        }
+        cout << endl;
 
         if (pergunta_imprimir_arquivo("fecho_trans_dir.txt"))
         {
-            cout << "Metodo de impressao em arquivo nao implementado" << endl
+            ofstream arquivo("fecho_trans_dir.txt");
+            for (char c : fecho_transitivo_direto)
+                arquivo << c << " ";
+            arquivo.close();
+            cout << "Resultado salvo em fecho_trans_dir.txt" << endl
                  << endl;
         }
 
@@ -42,15 +57,30 @@ void Gerenciador::comandos(Grafo *grafo)
 
         char id_no = get_id_entrada();
         vector<char> fecho_transitivo_indireto = grafo->fecho_transitivo_indireto(id_no);
-        cout << "Metodo de impressao em tela nao implementado" << endl
-             << endl;
+
+        cout << "Fecho transitivo indireto do nó " << id_no << ": ";
+        if (fecho_transitivo_indireto.empty())
+        {
+            cout << "Nenhum nó alcançável." << endl;
+        }
+        else
+        {
+            for (char c : fecho_transitivo_indireto)
+                cout << c << " ";
+            cout << endl;
+        }
+        cout << endl;
 
         if (pergunta_imprimir_arquivo("fecho_trans_indir.txt"))
         {
-            cout << "Metodo de impressao em arquivo nao implementado" << endl;
+            ofstream arquivo("fecho_trans_indir.txt");
+            for (char c : fecho_transitivo_indireto)
+                arquivo << c << " ";
+            arquivo.close();
+            cout << "Resultado salvo em fecho_trans_indir.txt" << endl
+                 << endl;
         }
 
-        ;
         break;
     }
 

@@ -24,6 +24,7 @@ public:
     Grafo(int ordem, string regras, vector<string> lista_vertices, vector<string> lista_arestas);
     ~Grafo();
 
+    No* getNoPorId(char id);
     vector<char> fecho_transitivo_direto(int id_no);                // a
     vector<char> fecho_transitivo_indireto(int id_no);              // b
     vector<char> caminho_minimo_dijkstra(int id_no_a, int id_no_b); // c
