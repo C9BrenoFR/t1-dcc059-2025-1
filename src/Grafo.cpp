@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <stack>
+#include <unordered_set>
 
 using namespace std;
 
@@ -205,8 +206,60 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
 
 Grafo *Grafo::arvore_caminhamento_profundidade(int id_no)
 {
-    std::cout << "Metodo nao implementado" << endl;
-    return nullptr;
+    char id_char = static_cast<char>(id_no);
+    No *inicio = getNoPorId(id_char);
+    if (!inicio)
+        return nullptr;
+
+    unordered_set<char> marcado;
+    vector<char> visitados;
+    vector<string> arestas_arvore;
+    stack<pair<No *, char>> pilha;
+    pilha.push({inicio, '\0'});
+
+    while (!pilha.empty())
+    {
+        auto [atual, pai] = pilha.top();
+        pilha.pop();
+
+        char id_atual = atual->getId();
+        if (marcado.count(id_atual))
+            continue;
+
+        marcado.insert(id_atual);
+        visitados.push_back(id_atual);
+        if (pai != '\0')
+        {
+            arestas_arvore.emplace_back(
+                string(1, pai) + " " + string(1, id_atual));
+        }
+
+        auto adj = atual->getArestas();
+        for (size_t i = adj.size(); i-- > 0;)
+        {
+            No *proximo = getNoPorId(adj[i]->getIdNoAlvo());
+            if (proximo && !marcado.count(proximo->getId()))
+            {
+                pilha.push({proximo, id_atual});
+            }
+        }
+    }
+
+    vector<string> vertices_arvore;
+    for (char id : visitados)
+    {
+        No *no = getNoPorId(id);
+        string s(1, id);
+        if (in_ponderado_vertice)
+            s += " " + to_string(no->getPeso());
+        vertices_arvore.push_back(s);
+    }
+
+    string regras = "1 " +
+                    string(in_ponderado_aresta ? "1" : "0") + " " +
+                    string(in_ponderado_vertice ? "1" : "0");
+
+    return new Grafo(visitados.size(), regras, vertices_arvore, arestas_arvore);
 }
 
 int Grafo::raio()

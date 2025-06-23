@@ -179,18 +179,54 @@ void Gerenciador::comandos(Grafo *grafo)
 
     case 'g':
     {
-
         char id_no = get_id_entrada();
-        Grafo *arvore_caminhamento_profundidade = grafo->arvore_caminhamento_profundidade(id_no);
-        cout << "Metodo de impressao em tela nao implementado" << endl
-             << endl;
+        Grafo *arvore = grafo->arvore_caminhamento_profundidade(static_cast<int>(id_no));
 
-        if (pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt"))
+        if (arvore)
         {
-            cout << "Metodo de impressao em arquivo nao implementado" << endl;
+            // Imprimir na tela
+            cout << "Arvore de caminhamento em profundidade a partir de " << id_no << ":" << endl;
+            for (No *no : arvore->getListaAdj())
+            {
+                cout << no->getId() << " -> ";
+                for (Aresta *aresta : no->getArestas())
+                {
+                    cout << aresta->getIdNoAlvo() << " ";
+                }
+                cout << endl;
+            }
+            cout << endl;
+
+            // Salvar em arquivo se solicitado
+            if (pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt"))
+            {
+                ofstream arquivo("arvore_caminhamento_profundidade.txt");
+                if (arquivo.is_open())
+                {
+                    for (No *no : arvore->getListaAdj())
+                    {
+                        arquivo << no->getId() << " -> ";
+                        for (Aresta *aresta : no->getArestas())
+                        {
+                            arquivo << aresta->getIdNoAlvo() << " ";
+                        }
+                        arquivo << endl;
+                    }
+                    arquivo.close();
+                    cout << "Arvore salva em arvore_caminhamento_profundidade.txt" << endl;
+                }
+                else
+                {
+                    cout << "Erro ao abrir o arquivo!" << endl;
+                }
+            }
+        }
+        else
+        {
+            cout << "Arvore nao pode ser gerada para o no " << id_no << endl;
         }
 
-        delete arvore_caminhamento_profundidade;
+        delete arvore;
         break;
     }
 
