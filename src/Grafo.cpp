@@ -27,8 +27,6 @@ Grafo::Grafo(int ordem, string regras, vector<string> lista_vertices, vector<str
         {
             if (vertice->getId() == lista_aresta[0])
                 vertice->setAresta(new Aresta(lista_aresta[2], in_ponderado_aresta ? lista_aresta[4] - '0' : 0));
-            else if (!in_direcionado && vertice->getId() == lista_aresta[2])
-                vertice->setAresta(new Aresta(lista_aresta[0], in_ponderado_aresta ? lista_aresta[4] - '0' : 0));
         }
     }
 }
@@ -194,14 +192,84 @@ vector<char> Grafo::caminho_minimo_floyd(int id_no, int id_no_b)
 
 Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
 {
-    std::cout << "Metodo nao implementado" << endl;
-    return nullptr;
+    if (!in_ponderado_aresta)
+        return nullptr;
 }
 
 Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
 {
-    std::cout << "Metodo nao implementado" << endl;
+    if (!in_ponderado_aresta)
+        return nullptr;
+    vector<Aresta *> lista_arestas = this->getListaArestaOrdenada();
+
+    cout << "Arestas Ordenadas:\n";
+    for (Aresta *aresta : lista_arestas)
+    {
+        cout << aresta->getIdNoAlvo() << " " << aresta->getPeso() << endl;
+    }
+
+    // TODO: Implementar algoritmo de Kruskal completo
     return nullptr;
+}
+
+vector<Aresta *> Grafo::getListaArestaOrdenada()
+{
+    vector<Aresta *> lista_arestas = {};
+    for (No *vertice : lista_adj)
+        for (Aresta *aresta : vertice->getArestas())
+            lista_arestas.emplace_back(aresta);
+
+    if (lista_arestas.size() > 1)
+        ordenaListaAresta(lista_arestas, 0, lista_arestas.size() - 1);
+
+    return lista_arestas;
+}
+
+void Grafo::ordenaListaAresta(vector<Aresta *> &lista, int min, int max)
+{
+    if (min >= max)
+        return;
+
+    int meio = (min + max) / 2;
+
+    ordenaListaAresta(lista, min, meio);
+    ordenaListaAresta(lista, meio + 1, max);
+
+    // Merge das duas partes ordenadas
+    vector<Aresta *> temp;
+    int i = min;
+    int j = meio + 1;
+
+    while (i <= meio && j <= max)
+    {
+        if (lista[i]->getPeso() <= lista[j]->getPeso())
+        {
+            temp.push_back(lista[i]);
+            i++;
+        }
+        else
+        {
+            temp.push_back(lista[j]);
+            j++;
+        }
+    }
+
+    while (i <= meio)
+    {
+        temp.push_back(lista[i]);
+        i++;
+    }
+
+    while (j <= max)
+    {
+        temp.push_back(lista[j]);
+        j++;
+    }
+
+    for (int k = 0; k < temp.size(); ++k)
+    {
+        lista[min + k] = temp[k];
+    }
 }
 
 Grafo *Grafo::arvore_caminhamento_profundidade(int id_no)
