@@ -4,6 +4,21 @@
 #include "Gerenciador.h"
 
 using namespace std;
+
+void imprimeListaAdj(Grafo *grafo)
+{
+    cout << "+-+-----------\n";
+    for (No *no : grafo->getListaAdj())
+    {
+        cout << "|" << no->getId() << "|";
+        for (Aresta *aresta : no->getArestas())
+            cout << aresta->getIdNoAlvo() << " ";
+        cout << endl;
+    }
+
+    cout << "+-+-----------\n";
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -21,18 +36,20 @@ int main(int argc, char *argv[])
     string no_c = "c 3";
     string no_d = "d 4";
     string no_e = "e 5";
-    string aresta_ab = "a b 5";
-    string aresta_be = "b e 4";
-    string aresta_ec = "e c 3";
-    string aresta_de = "d e 2";
-    string aresta_ae = "a e 1";
+    string aresta_1 = "a b 2";
+    string aresta_2 = "a c 3";
+    string aresta_3 = "b c 1";
+    string aresta_4 = "b d 4";
+    string aresta_5 = "c e 5";
+    string aresta_6 = "d e 6";
 
     vector<string> vertices = vector<string>{no_a, no_b, no_c, no_d, no_e};
-    vector<string> arestas = vector<string>{aresta_ab, aresta_ae, aresta_be, aresta_de, aresta_ec};
+    vector<string> arestas = vector<string>{aresta_1, aresta_2, aresta_3, aresta_4, aresta_5, aresta_6};
 
     Grafo *grafo = new Grafo(5, regras, vertices, arestas);
-    grafo->arvore_geradora_minima_kruskal({});
-    Gerenciador::comandos(grafo);
+    Grafo *agmg1 = grafo->arvore_geradora_minima_kruskal({});
+    imprimeListaAdj(agmg1);
+    // Gerenciador::comandos(grafo);
 
     return 0;
 }
