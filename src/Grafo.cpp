@@ -260,9 +260,68 @@ vector<char> Grafo::caminho_minimo_dijkstra(int id_no_a, int id_no_b)
 }
 
 vector<char> Grafo::caminho_minimo_floyd(int id_no, int id_no_b)
-{
-    std::cout << "Metodo nao implementado" << endl;
-    return {};
+{ 
+    const int INF = __INT_MAX__;  // Valor para representar a ausencia de caminho - infinito
+    int n = lista_adj.size(); // Número de nós no grafo
+
+
+    // Cria dois mapas para converter entre:
+    map<char, int> id_para_indice; // - char (id do vértice) → índice numérico (para usar na matriz)
+    map<int, char> indice_para_id;  // índice numérico → char (para converter de volta ao final)
+
+    for (int i = 0; i < n; i++) { 
+        id_para_indice[lista_adj[i]->getId()] = i;
+        indice_para_id[i] = lista_adj[i]->getId();
+    }
+
+    vector<vector<int>> dist(n, vector<int>(n, INF)); // Cria e inicializa a matriz de distâncias com infinito
+    vector<vector<int>> prox(n, vector<int>(n, -1)); // Cria e inicializa a matriz de predecessores com -1
+
+    // Inicializa as distâncias diretas entre os nos
+    for (int i = 0; i < n; i++) {
+        dist[i][i] = 0; // Distância de um nó para ele mesmo é 0
+        prox[i][i] = i; // Predecessor de um nó para ele mesmo é ele mesmo
+
+        for (Aresta* aresta : lista_adj[i]->getArestas()) {
+            int j = id_para_indice[aresta->getIdNoAlvo()]; // Indice do nó de destino
+            dist[i][j] = aresta->getPeso(); // Peso da aresta direta
+            prox[i][j] = j; // Próximo nó no caminho
+        }
+    }
+
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dist[i][k] != INF && dist[k][j] != INF && dist[i][k] + dist[k][j] < dist[i][j]) { // Só atualiza se ambos os caminhos  existirem
+                    dist[i][j] = dist[i][k] + dist[k][j]; //Atualiza o menor custo
+                    prox[i][j] = prox[i][k]; //Atualiza o próximo nó
+                }
+            }
+        }
+    }
+
+
+    //Pega os indices dos nos de origem e destino
+    int origem = id_para_indice[static_cast<char>(id_no)];
+    int destino = id_para_indice[static_cast<char>(id_no_b)];
+
+    if (dist[origem][destino] == INF) {
+        cout << "Nao ha caminho entre os nos " << static_cast<char>(id_no) << " e " << static_cast<char>(id_no_b) << endl;
+        return {};
+    }
+
+    // Reconstrução do caminho
+    vector<char> caminho;
+    int atual = origem;
+    while (atual != destino) {
+        caminho.push_back(indice_para_id[atual]);
+        atual = prox[atual][destino];
+    }
+    caminho.push_back(indice_para_id[destino]);
+
+    cout << "Distancia minima de " << static_cast<char>(id_no) << " para " << static_cast<char>(id_no_b) << " = " << dist[origem][destino] << endl;
+
+    return caminho;
 }
 
 Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)

@@ -135,12 +135,31 @@ void Gerenciador::comandos(Grafo *grafo)
         char id_no_1 = get_id_entrada();
         char id_no_2 = get_id_entrada();
         vector<char> caminho_minimo_floyd = grafo->caminho_minimo_floyd(id_no_1, id_no_2);
-        cout << "Metodo de impressao em tela nao implementado" << endl
-             << endl;
+        if(caminho_minimo_floyd.empty()){
+            cout << "Nenhum caminho encontrado entre os nós " << id_no_1 << "e " << id_no_2 << "." << endl;
+        } 
+        else{
+            cout << "Caminho mínimo de " << id_no_1 << " a " << id_no_2 << ": ";
+            for (char c : caminho_minimo_floyd)
+            {
+                cout << c;
+                if(c != id_no_2) cout << ",";   
+            }
+            cout << endl<< endl;
+        }
 
         if (pergunta_imprimir_arquivo("caminho_minimo_floyd.txt"))
         {
-            cout << "Metodo de impressao em arquivo nao implementado" << endl;
+            ofstream arquivo("caminho_minimo_floyd.txt");
+            if (arquivo.is_open()){
+                for (char c : caminho_minimo_floyd){
+                    arquivo << c;
+                    if(c != id_no_2) arquivo << ",";
+                }
+                arquivo.close();
+                cout << "Resultado salvo em caminho_minimo_floyd.txt" << endl<< endl;
+            }
+            else cout << "Erro ao abrir o arquivo!" << endl<< endl;
         }
 
         break;
