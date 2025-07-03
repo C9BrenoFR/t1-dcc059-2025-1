@@ -109,7 +109,21 @@ void Gerenciador::comandos(Grafo *grafo)
 
         if (pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt"))
         {
-            cout << "Metodo de impressao em arquivo nao implementado" << endl;
+            ofstream arquivo("caminho_minimo_dijkstra.txt");
+            if (arquivo.is_open())
+            {
+                for (char c : caminho_minimo_dijkstra)
+                {
+                    arquivo << c;
+                    if(c != id_no_2) arquivo << ",";
+                }
+                arquivo.close();
+                cout << "Resultado salvo em caminho_minimo_dijkstra.txt" << endl<< endl;
+            }
+            else
+            {
+                cout << "Erro ao abrir o arquivo!" << endl<< endl;
+            }
         }
 
         break;
