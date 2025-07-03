@@ -5,20 +5,6 @@
 
 using namespace std;
 
-void imprimeListaAdj(Grafo *grafo)
-{
-    cout << "+-+-----------\n";
-    for (No *no : grafo->getListaAdj())
-    {
-        cout << "|" << no->getId() << "|";
-        for (Aresta *aresta : no->getArestas())
-            cout << aresta->getIdNoAlvo() << " ";
-        cout << endl;
-    }
-
-    cout << "+-+-----------\n";
-}
-
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -48,8 +34,7 @@ int main(int argc, char *argv[])
 
     Grafo *grafo = new Grafo(5, regras, vertices, arestas);
     Grafo *agmg1 = grafo->arvore_geradora_minima_kruskal({});
-    imprimeListaAdj(agmg1);
-    // Gerenciador::comandos(grafo);
+    Gerenciador::comandos(grafo);
 
     return 0;
 }

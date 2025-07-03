@@ -159,8 +159,7 @@ void Gerenciador::comandos(Grafo *grafo)
 
             vector<char> ids = get_conjunto_ids(grafo, tam);
             Grafo *arvore_geradora_minima_kruskal = grafo->arvore_geradora_minima_kruskal(ids);
-            cout << "Metodo de impressao em tela nao implementado" << endl
-                 << endl;
+            imprimeListaAdj(arvore_geradora_minima_kruskal);
 
             if (pergunta_imprimir_arquivo("agm_kruskal.txt"))
             {
@@ -337,4 +336,18 @@ bool Gerenciador::pergunta_imprimir_arquivo(string nome_arquivo)
         cout << "Resposta invalida" << endl;
         return pergunta_imprimir_arquivo(nome_arquivo);
     }
+}
+
+void Gerenciador::imprimeListaAdj(Grafo *grafo)
+{
+    cout << "+-+-----------\n";
+    for (No *no : grafo->getListaAdj())
+    {
+        cout << "|" << no->getId() << "|";
+        for (Aresta *aresta : no->getArestas())
+            cout << aresta->getIdNoAlvo() << " ";
+        cout << endl;
+    }
+
+    cout << "+-+-----------\n";
 }
