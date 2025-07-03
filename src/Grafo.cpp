@@ -209,7 +209,7 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
 {
     if (!in_ponderado_aresta)
         return nullptr;
-    vector<Aresta *> lista_arestas_ordenadas = getListaArestaOrdenada();
+    vector<Aresta *> lista_arestas_ordenadas = getListaArestaOrdenada(ids_nos);
 
     vector<No *> agm;
     for (No *no_original : lista_adj)
@@ -251,12 +251,31 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
     return grafo;
 }
 
-vector<Aresta *> Grafo::getListaArestaOrdenada()
+vector<Aresta *> Grafo::getListaArestaOrdenada(vector<char> ids_nos)
 {
     vector<Aresta *> lista_arestas = {};
+
     for (No *vertice : lista_adj)
+    {
         for (Aresta *aresta : vertice->getArestas())
-            lista_arestas.emplace_back(aresta);
+        {
+            bool origem_valida = false;
+            bool alvo_valido = false;
+
+            for (char id : ids_nos)
+            {
+                if (aresta->getIdNoOrigem() == id)
+                    origem_valida = true;
+                if (aresta->getIdNoAlvo() == id)
+                    alvo_valido = true;
+            }
+
+            if (origem_valida && alvo_valido)
+            {
+                lista_arestas.emplace_back(aresta);
+            }
+        }
+    }
 
     if (lista_arestas.size() > 1)
         ordenaListaAresta(lista_arestas, 0, lista_arestas.size() - 1);

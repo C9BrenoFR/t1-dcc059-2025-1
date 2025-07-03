@@ -19,7 +19,7 @@ private:
     bool in_ponderado_aresta;
     bool in_ponderado_vertice;
     vector<No *> lista_adj;
-    vector<Aresta *> getListaArestaOrdenada();
+    vector<Aresta *> getListaArestaOrdenada(vector<char> id_nos);
     void ordenaListaAresta(vector<Aresta *> &lista, int min, int max);
 
 public:
