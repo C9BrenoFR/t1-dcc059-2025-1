@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     vector<string> arestas = vector<string>{aresta_1, aresta_2, aresta_3, aresta_4, aresta_5, aresta_6};
 
     Grafo *grafo = new Grafo(5, regras, vertices, arestas);
-    Grafo *agmg1 = grafo->arvore_geradora_minima_kruskal({});
+
     Gerenciador::comandos(grafo);
 
     return 0;
