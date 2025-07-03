@@ -90,8 +90,22 @@ void Gerenciador::comandos(Grafo *grafo)
         char id_no_1 = get_id_entrada();
         char id_no_2 = get_id_entrada();
         vector<char> caminho_minimo_dijkstra = grafo->caminho_minimo_dijkstra(id_no_1, id_no_2);
-        cout << "Metodo de impressao em tela nao implementado" << endl
-             << endl;
+        
+        if(caminho_minimo_dijkstra.empty())
+        {
+            cout << "Nenhum caminho encontrado entre os nós " << id_no_1 << " e " << id_no_2 << "." << endl;
+        }
+        else
+        {
+            cout << "Caminho mínimo de " << id_no_1 << " a " << id_no_2 << ": ";
+            for (char c : caminho_minimo_dijkstra){
+                cout << c;
+                if(c != id_no_2) cout << ",";
+
+            }
+            cout << endl<< endl;
+        }   
+
 
         if (pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt"))
         {
