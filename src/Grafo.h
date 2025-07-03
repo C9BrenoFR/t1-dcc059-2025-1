@@ -24,6 +24,7 @@ private:
 
 public:
     Grafo(int ordem, string regras, vector<string> lista_vertices, vector<string> lista_arestas);
+    Grafo(int ordem, bool in_direcionado, bool in_ponderado_aresta, bool in_ponderado_vertice, vector<No *> lista_adj);
     ~Grafo();
 
     No *getNoPorId(char id);

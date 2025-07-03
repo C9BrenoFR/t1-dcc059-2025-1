@@ -26,9 +26,18 @@ Grafo::Grafo(int ordem, string regras, vector<string> lista_vertices, vector<str
         for (No *vertice : lista_adj)
         {
             if (vertice->getId() == lista_aresta[0])
-                vertice->setAresta(new Aresta(lista_aresta[2], in_ponderado_aresta ? lista_aresta[4] - '0' : 0));
+                vertice->setAresta(new Aresta(vertice->getId(), lista_aresta[2], in_ponderado_aresta ? lista_aresta[4] - '0' : 0));
         }
     }
+}
+
+Grafo::Grafo(int ordem, bool in_direcionado, bool in_ponderado_aresta, bool in_ponderado_vertice, vector<No *> lista_adj)
+{
+    this->ordem = ordem;
+    this->in_direcionado = in_direcionado;
+    this->in_ponderado_aresta = in_ponderado_aresta;
+    this->in_ponderado_vertice = in_ponderado_vertice;
+    this->lista_adj = lista_adj;
 }
 
 vector<No *> Grafo::getListaAdj()
@@ -200,16 +209,46 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
 {
     if (!in_ponderado_aresta)
         return nullptr;
-    vector<Aresta *> lista_arestas = this->getListaArestaOrdenada();
+    vector<Aresta *> lista_arestas_ordenadas = getListaArestaOrdenada();
 
-    cout << "Arestas Ordenadas:\n";
-    for (Aresta *aresta : lista_arestas)
+    vector<No *> agm;
+    for (No *no_original : lista_adj)
     {
-        cout << aresta->getIdNoAlvo() << " " << aresta->getPeso() << endl;
+        No *no_copia = new No(no_original->getId(), no_original->getPeso());
+        agm.push_back(no_copia);
     }
 
-    // TODO: Implementar algoritmo de Kruskal completo
-    return nullptr;
+    vector<char> nos_encontrados;
+
+    for (Aresta *aresta : lista_arestas_ordenadas)
+    {
+        bool encontrou_origem = false, encontrou_alvo = false;
+        for (char no : nos_encontrados)
+        {
+            if (aresta->getIdNoOrigem() == no)
+                encontrou_origem = true;
+            else if (aresta->getIdNoAlvo() == no)
+                encontrou_alvo = true;
+        }
+        if (!encontrou_origem || !encontrou_alvo)
+        {
+            for (No *no : agm)
+            {
+                if (no->getId() == aresta->getIdNoOrigem())
+                {
+                    no->setAresta(aresta);
+                    break;
+                }
+            }
+            if (!encontrou_origem)
+                nos_encontrados.emplace_back(aresta->getIdNoOrigem());
+            if (!encontrou_alvo)
+                nos_encontrados.emplace_back(aresta->getIdNoAlvo());
+        }
+    }
+
+    Grafo *grafo = new Grafo(ordem, in_direcionado, in_ponderado_aresta, in_ponderado_vertice, agm);
+    return grafo;
 }
 
 vector<Aresta *> Grafo::getListaArestaOrdenada()
@@ -235,7 +274,6 @@ void Grafo::ordenaListaAresta(vector<Aresta *> &lista, int min, int max)
     ordenaListaAresta(lista, min, meio);
     ordenaListaAresta(lista, meio + 1, max);
 
-    // Merge das duas partes ordenadas
     vector<Aresta *> temp;
     int i = min;
     int j = meio + 1;
