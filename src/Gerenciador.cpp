@@ -129,8 +129,7 @@ void Gerenciador::comandos(Grafo *grafo)
 
             vector<char> ids = get_conjunto_ids(grafo, tam);
             Grafo *arvore_geradora_minima_prim = grafo->arvore_geradora_minima_prim(ids);
-            cout << "Metodo de impressao em tela nao implementado" << endl
-                 << endl;
+            imprimeListaAdj(arvore_geradora_minima_prim);
 
             if (pergunta_imprimir_arquivo("agm_prim.txt"))
             {
@@ -275,7 +274,6 @@ char Gerenciador::get_id_entrada()
     cout << "Digite o id de um no: ";
     char id;
     cin >> id;
-    cout << endl;
     return id;
 }
 

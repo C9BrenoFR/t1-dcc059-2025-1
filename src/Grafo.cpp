@@ -203,6 +203,77 @@ Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
 {
     if (!in_ponderado_aresta)
         return nullptr;
+    vector<No *> agm = {};
+    for (No *no : this->lista_adj)
+        if (no->getId() == ids_nos[0])
+            agm.emplace_back(new No(no->getId(), no->getPeso()));
+    algoritimo_prim(agm, ids_nos, ids_nos.size());
+    Grafo *grafo = new Grafo(ordem, in_direcionado, in_ponderado_aresta, in_ponderado_vertice, agm);
+    return grafo;
+}
+
+void Grafo::algoritimo_prim(vector<No *> &agm, vector<char> ids_nos, size_t max)
+{
+    if (agm.size() == max)
+        return;
+    vector<Aresta *> lista_arestas;
+    for (No *no_agm : agm)
+    {
+        for (No *no_lista : lista_adj)
+        {
+            for (Aresta *aresta : no_lista->getArestas())
+            {
+                if (aresta->getIdNoAlvo() == no_agm->getId() || aresta->getIdNoOrigem() == no_agm->getId())
+                {
+                    bool origem_valida = false, alvo_valido = false;
+                    for (char id_no : ids_nos)
+                    {
+                        if (id_no == aresta->getIdNoOrigem())
+                            origem_valida = true;
+                        if (id_no == aresta->getIdNoAlvo())
+                            alvo_valido = true;
+                    }
+
+                    if (origem_valida && alvo_valido)
+                        lista_arestas.emplace_back(aresta);
+                }
+            }
+        }
+    }
+    ordenaListaAresta(lista_arestas, 0, lista_arestas.size() - 1);
+    for (Aresta *aresta : lista_arestas)
+    {
+        bool origem_valida = true;
+        bool alvo_valido = true;
+        No *no_aux = nullptr;
+        for (No *no : agm)
+        {
+            if (no->getId() == aresta->getIdNoOrigem())
+            {
+                origem_valida = false;
+                no_aux = no;
+            }
+            if (no->getId() == aresta->getIdNoAlvo())
+            {
+                alvo_valido = false;
+                no_aux = no;
+            }
+        }
+        if (alvo_valido)
+        {
+            no_aux->setAresta(aresta);
+            agm.emplace_back(new No(aresta->getIdNoAlvo(), 0));
+            break;
+        }
+        else if (origem_valida)
+        {
+            No *novo_no = new No(aresta->getIdNoOrigem(), 0, {aresta});
+            agm.emplace_back(novo_no);
+            break;
+        }
+    }
+
+    algoritimo_prim(agm, ids_nos, max);
 }
 
 Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)

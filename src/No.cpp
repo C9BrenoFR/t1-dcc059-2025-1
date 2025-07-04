@@ -1,10 +1,10 @@
 #include "No.h"
 
-No::No(char id, int peso)
+No::No(char id, int peso, vector<Aresta *> arestas)
 {
     this->id = id;
     this->peso = peso;
-    arestas = vector<Aresta *>();
+    this->arestas = arestas;
 }
 
 char No::getId()

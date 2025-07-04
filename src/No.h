@@ -16,7 +16,7 @@ private:
     vector<Aresta *> arestas;
 
 public:
-    No(char id, int peso);
+    No(char id, int peso, vector<Aresta *> arestas = {});
     ~No();
 
     char getId();
