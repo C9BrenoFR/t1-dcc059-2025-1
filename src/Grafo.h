@@ -44,6 +44,9 @@ public:
 
     vector<No *> getListaAdj();
     int getOrdem();
+    bool getInDirecionado();
+    bool getInPonderadoAresta();
+    bool getInPonderadoVertice();
 };
 
 #endif // GRAFO_H

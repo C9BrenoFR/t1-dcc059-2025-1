@@ -15,11 +15,11 @@ Grafo::Grafo(int ordem, string regras, vector<string> lista_vertices, vector<str
     this->ordem = ordem;
     in_direcionado = (regras[0] == '1');
     in_ponderado_aresta = (regras[2] == '1');
-    in_ponderado_vertice = (regras[3] == '1');
+    in_ponderado_vertice = (regras[4] == '1');
 
     for (string lista_vertice : lista_vertices)
     {
-        No *vertice = new No(lista_vertice[0], in_ponderado_vertice ? lista_vertice[2] - '0' : 0);
+        No *vertice = new No(lista_vertice[0], in_ponderado_vertice ? stoi(lista_vertice.substr(2)) : 0);
         lista_adj.emplace_back(vertice);
     }
 
@@ -28,7 +28,7 @@ Grafo::Grafo(int ordem, string regras, vector<string> lista_vertices, vector<str
         for (No *vertice : lista_adj)
         {
             if (vertice->getId() == lista_aresta[0])
-                vertice->setAresta(new Aresta(vertice->getId(), lista_aresta[2], in_ponderado_aresta ? lista_aresta[4] - '0' : 0));
+                vertice->setAresta(new Aresta(vertice->getId(), lista_aresta[2], in_ponderado_aresta ? stoi(lista_aresta.substr(4)) : 0));
         }
     }
 }
@@ -50,6 +50,19 @@ vector<No *> Grafo::getListaAdj()
 int Grafo::getOrdem()
 {
     return ordem;
+}
+
+bool Grafo::getInDirecionado()
+{
+    return in_direcionado;
+}
+bool Grafo::getInPonderadoAresta()
+{
+    return in_ponderado_aresta;
+}
+bool Grafo::getInPonderadoVertice()
+{
+    return in_ponderado_vertice;
 }
 
 No *Grafo::getNoPorId(char id)
@@ -192,127 +205,140 @@ vector<char> Grafo::fecho_transitivo_indireto(int id_no)
 
 vector<char> Grafo::caminho_minimo_dijkstra(int id_no_a, int id_no_b)
 {
-    //Converte os ids dos nos de int para char
+    // Converte os ids dos nos de int para char
     char origem = static_cast<char>(id_no_a);
     char destino = static_cast<char>(id_no_b);
 
-    map<char, int> distancias; //Mapa para armazenar as menores distâncias conhecidas ate cada no
-    map<char, char> antecessores; //Mapa para armazenar o antecessor de cada no no caminho minimo
-    set<char> visitados; //Armazena os nos visitados
+    map<char, int> distancias;    // Mapa para armazenar as menores distâncias conhecidas ate cada no
+    map<char, char> antecessores; // Mapa para armazenar o antecessor de cada no no caminho minimo
+    set<char> visitados;          // Armazena os nos visitados
 
-
-    //Inicializa todos os nós com distancia infinita e sem antecessor
-    for(No *no: lista_adj){
+    // Inicializa todos os nós com distancia infinita e sem antecessor
+    for (No *no : lista_adj)
+    {
         distancias[no->getId()] = __INT_MAX__;
         antecessores[no->getId()] = '\0';
     }
 
-    distancias[origem] = 0; //Define a distancia da origem como 0 (pois o custo para chegar nela mesma é zero)
+    distancias[origem] = 0; // Define a distancia da origem como 0 (pois o custo para chegar nela mesma é zero)
 
-    while (visitados.size() < lista_adj.size()){ //Enquanto houver nos nao visitados
-        char u = '\0'; //Variável para armazenar o nó com a menor distância
-        int menor_distancia = __INT_MAX__; //Inicializa a menor distância como infinito
+    while (visitados.size() < lista_adj.size())
+    {                                      // Enquanto houver nos nao visitados
+        char u = '\0';                     // Variável para armazenar o nó com a menor distância
+        int menor_distancia = __INT_MAX__; // Inicializa a menor distância como infinito
 
-
-        //Encontra o no com a menor distância que ainda não foi visitado
-        for (auto &par : distancias) { 
-            if (visitados.find(par.first) == visitados.end() && par.second < menor_distancia) {
+        // Encontra o no com a menor distância que ainda não foi visitado
+        for (auto &par : distancias)
+        {
+            if (visitados.find(par.first) == visitados.end() && par.second < menor_distancia)
+            {
                 menor_distancia = par.second;
                 u = par.first;
             }
         }
 
-        //Se não encontrou nenhum no alcançável - encerra o loop
-        if (u == '\0') {
+        // Se não encontrou nenhum no alcançável - encerra o loop
+        if (u == '\0')
+        {
             break;
         }
 
-        visitados.insert(u); //Marca o no atual como visitado
+        visitados.insert(u); // Marca o no atual como visitado
 
-        //Obtem o no atual a partir do id
-        //Se o no atual não existir, continua para o próximo loop
+        // Obtem o no atual a partir do id
+        // Se o no atual não existir, continua para o próximo loop
         No *no_atual = getNoPorId(u);
-        if (!no_atual) {
+        if (!no_atual)
+        {
             continue;
         }
 
+        // Percorre as arestas do no atual
+        for (Aresta *aresta : no_atual->getArestas())
+        {
+            char v = aresta->getIdNoAlvo();      // Obtem o id do no alvo da aresta
+            int peso_aresta = aresta->getPeso(); // Obtem o peso da aresta
 
-        //Percorre as arestas do no atual
-        for(Aresta *aresta : no_atual->getArestas()) {
-            char v = aresta->getIdNoAlvo(); //Obtem o id do no alvo da aresta
-            int peso_aresta = aresta->getPeso(); //Obtem o peso da aresta
-
-            if (distancias[u] != __INT_MAX__ && distancias[u] + peso_aresta < distancias[v]) {
-                distancias[v] = distancias[u] + peso_aresta; //Atualiza a menor distância para o no alvo
-                antecessores[v] = u; //Atualiza o antecessor do no alvo
+            if (distancias[u] != __INT_MAX__ && distancias[u] + peso_aresta < distancias[v])
+            {
+                distancias[v] = distancias[u] + peso_aresta; // Atualiza a menor distância para o no alvo
+                antecessores[v] = u;                         // Atualiza o antecessor do no alvo
             }
         }
     }
 
-    //Se a distância do destino for infinita, significa que não há caminho
-    if(distancias[destino] == __INT_MAX__ ) {
+    // Se a distância do destino for infinita, significa que não há caminho
+    if (distancias[destino] == __INT_MAX__)
+    {
         cout << "Nao ha caminho entre os nos " << origem << " e " << destino << endl;
         return {};
     }
 
-    //Reconstrói o caminho a partir do destino até a origem usando os antecessores
+    // Reconstrói o caminho a partir do destino até a origem usando os antecessores
     vector<char> caminho;
     char atual = destino;
-    while (atual != '\0') {
-        caminho.insert(caminho.begin(), atual); //Insere o no atual no início do caminho
-        atual = antecessores[atual]; //Move para o antecessor do no atual
+    while (atual != '\0')
+    {
+        caminho.insert(caminho.begin(), atual); // Insere o no atual no início do caminho
+        atual = antecessores[atual];            // Move para o antecessor do no atual
     }
 
     return caminho;
 }
 
 vector<char> Grafo::caminho_minimo_floyd(int id_no, int id_no_b)
-{ 
-    const int INF = __INT_MAX__;  // Valor para representar a ausencia de caminho - infinito
-    int n = lista_adj.size(); // Número de nós no grafo
-
+{
+    const int INF = __INT_MAX__; // Valor para representar a ausencia de caminho - infinito
+    int n = lista_adj.size();    // Número de nós no grafo
 
     // Cria dois mapas para converter entre:
     map<char, int> id_para_indice; // - char (id do vértice) → índice numérico (para usar na matriz)
-    map<int, char> indice_para_id;  // índice numérico → char (para converter de volta ao final)
+    map<int, char> indice_para_id; // índice numérico → char (para converter de volta ao final)
 
-    for (int i = 0; i < n; i++) { 
+    for (int i = 0; i < n; i++)
+    {
         id_para_indice[lista_adj[i]->getId()] = i;
         indice_para_id[i] = lista_adj[i]->getId();
     }
 
     vector<vector<int>> dist(n, vector<int>(n, INF)); // Cria e inicializa a matriz de distâncias com infinito
-    vector<vector<int>> prox(n, vector<int>(n, -1)); // Cria e inicializa a matriz de predecessores com -1
+    vector<vector<int>> prox(n, vector<int>(n, -1));  // Cria e inicializa a matriz de predecessores com -1
 
     // Inicializa as distâncias diretas entre os nos
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         dist[i][i] = 0; // Distância de um nó para ele mesmo é 0
         prox[i][i] = i; // Predecessor de um nó para ele mesmo é ele mesmo
 
-        for (Aresta* aresta : lista_adj[i]->getArestas()) {
+        for (Aresta *aresta : lista_adj[i]->getArestas())
+        {
             int j = id_para_indice[aresta->getIdNoAlvo()]; // Indice do nó de destino
-            dist[i][j] = aresta->getPeso(); // Peso da aresta direta
-            prox[i][j] = j; // Próximo nó no caminho
+            dist[i][j] = aresta->getPeso();                // Peso da aresta direta
+            prox[i][j] = j;                                // Próximo nó no caminho
         }
     }
 
-    for (int k = 0; k < n; k++) {
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (dist[i][k] != INF && dist[k][j] != INF && dist[i][k] + dist[k][j] < dist[i][j]) { // Só atualiza se ambos os caminhos  existirem
-                    dist[i][j] = dist[i][k] + dist[k][j]; //Atualiza o menor custo
-                    prox[i][j] = prox[i][k]; //Atualiza o próximo nó
+    for (int k = 0; k < n; k++)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                if (dist[i][k] != INF && dist[k][j] != INF && dist[i][k] + dist[k][j] < dist[i][j])
+                {                                         // Só atualiza se ambos os caminhos  existirem
+                    dist[i][j] = dist[i][k] + dist[k][j]; // Atualiza o menor custo
+                    prox[i][j] = prox[i][k];              // Atualiza o próximo nó
                 }
             }
         }
     }
 
-
-    //Pega os indices dos nos de origem e destino
+    // Pega os indices dos nos de origem e destino
     int origem = id_para_indice[static_cast<char>(id_no)];
     int destino = id_para_indice[static_cast<char>(id_no_b)];
 
-    if (dist[origem][destino] == INF) {
+    if (dist[origem][destino] == INF)
+    {
         cout << "Nao ha caminho entre os nos " << static_cast<char>(id_no) << " e " << static_cast<char>(id_no_b) << endl;
         return {};
     }
@@ -320,7 +346,8 @@ vector<char> Grafo::caminho_minimo_floyd(int id_no, int id_no_b)
     // Reconstrução do caminho
     vector<char> caminho;
     int atual = origem;
-    while (atual != destino) {
+    while (atual != destino)
+    {
         caminho.push_back(indice_para_id[atual]);
         atual = prox[atual][destino];
     }
