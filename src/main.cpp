@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include "colors.h"
 #include "Gerenciador.h"
 
 using namespace std;
@@ -9,32 +11,48 @@ int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-        std::cout << "Uso: ./main <nome_do_arquivo>\n";
+        cout << RED << "Uso: ./main <nome_do_arquivo>\n"
+             << RESET;
         return 1;
     }
-    std::string nome_arquivo = argv[1];
+    string linha, regras, nome_arquivo = argv[1];
+    vector<string> vertices, arestas;
+    int ordem, linha_atual = 0;
+
     nome_arquivo = "../instancias/" + nome_arquivo;
-    std::cout << "Arquivo passado: " << nome_arquivo << std::endl;
+    ifstream arquivo(nome_arquivo);
 
-    string regras = "1 1 1";
-    string no_a = "a 1";
-    string no_b = "b 2";
-    string no_c = "c 3";
-    string no_d = "d 4";
-    string no_e = "e 5";
-    string aresta_1 = "a b 2";
-    string aresta_2 = "a c 3";
-    string aresta_3 = "b c 1";
-    string aresta_4 = "b d 4";
-    string aresta_5 = "c e 5";
-    string aresta_6 = "d e 6";
+    if (arquivo.is_open())
+    {
+        while (getline(arquivo, linha))
+        {
+            linha_atual++;
+            if (linha_atual == 1)
+                regras = linha;
+            else if (linha_atual == 2)
+                ordem = stoi(linha);
+            else if (linha_atual > 2 && linha_atual <= 2 + ordem)
+                vertices.emplace_back(linha);
+            else
+                arestas.emplace_back(linha);
+        }
+        arquivo.close();
+    }
+    else
+    {
+        cout << WARNING << "Erro ao abrir " << nome_arquivo << " para leitura\n"
+             << RESET;
+        cout << RED << "Digite apenas o nome do arquivo contido na pasta instancias ex:\n"
+             << RESET
+             << YELLOW << "./execGrupoX grafo01.txt (Caso esteja compilando via g++)\n"
+             << "./compile.sh grafo01.txt (Caso esteja compilando com o script)\n"
+             << RESET;
+        return 1;
+    }
 
-    vector<string> vertices = vector<string>{no_a, no_b, no_c, no_d, no_e};
-    vector<string> arestas = vector<string>{aresta_1, aresta_2, aresta_3, aresta_4, aresta_5, aresta_6};
-
-    Grafo *grafo = new Grafo(5, regras, vertices, arestas);
-
-    Gerenciador::comandos(grafo);
+    Grafo *grafo = new Grafo(ordem, regras, vertices, arestas);
+    Gerenciador::imprimeListaAdj(grafo);
+    // Gerenciador::comandos(grafo);
 
     return 0;
 }
