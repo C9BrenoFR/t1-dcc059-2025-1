@@ -90,22 +90,23 @@ void Gerenciador::comandos(Grafo *grafo)
         char id_no_1 = get_id_entrada();
         char id_no_2 = get_id_entrada();
         vector<char> caminho_minimo_dijkstra = grafo->caminho_minimo_dijkstra(id_no_1, id_no_2);
-        
-        if(caminho_minimo_dijkstra.empty())
+
+        if (caminho_minimo_dijkstra.empty())
         {
             cout << "Nenhum caminho encontrado entre os nós " << id_no_1 << " e " << id_no_2 << "." << endl;
         }
         else
         {
             cout << "Caminho mínimo de " << id_no_1 << " a " << id_no_2 << ": ";
-            for (char c : caminho_minimo_dijkstra){
+            for (char c : caminho_minimo_dijkstra)
+            {
                 cout << c;
-                if(c != id_no_2) cout << ",";
-
+                if (c != id_no_2)
+                    cout << ",";
             }
-            cout << endl<< endl;
-        }   
-
+            cout << endl
+                 << endl;
+        }
 
         if (pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt"))
         {
@@ -115,14 +116,17 @@ void Gerenciador::comandos(Grafo *grafo)
                 for (char c : caminho_minimo_dijkstra)
                 {
                     arquivo << c;
-                    if(c != id_no_2) arquivo << ",";
+                    if (c != id_no_2)
+                        arquivo << ",";
                 }
                 arquivo.close();
-                cout << "Resultado salvo em caminho_minimo_dijkstra.txt" << endl<< endl;
+                cout << "Resultado salvo em caminho_minimo_dijkstra.txt" << endl
+                     << endl;
             }
             else
             {
-                cout << "Erro ao abrir o arquivo!" << endl<< endl;
+                cout << "Erro ao abrir o arquivo!" << endl
+                     << endl;
             }
         }
 
@@ -135,31 +139,41 @@ void Gerenciador::comandos(Grafo *grafo)
         char id_no_1 = get_id_entrada();
         char id_no_2 = get_id_entrada();
         vector<char> caminho_minimo_floyd = grafo->caminho_minimo_floyd(id_no_1, id_no_2);
-        if(caminho_minimo_floyd.empty()){
+        if (caminho_minimo_floyd.empty())
+        {
             cout << "Nenhum caminho encontrado entre os nós " << id_no_1 << "e " << id_no_2 << "." << endl;
-        } 
-        else{
+        }
+        else
+        {
             cout << "Caminho mínimo de " << id_no_1 << " a " << id_no_2 << ": ";
             for (char c : caminho_minimo_floyd)
             {
                 cout << c;
-                if(c != id_no_2) cout << ",";   
+                if (c != id_no_2)
+                    cout << ",";
             }
-            cout << endl<< endl;
+            cout << endl
+                 << endl;
         }
 
         if (pergunta_imprimir_arquivo("caminho_minimo_floyd.txt"))
         {
             ofstream arquivo("caminho_minimo_floyd.txt");
-            if (arquivo.is_open()){
-                for (char c : caminho_minimo_floyd){
+            if (arquivo.is_open())
+            {
+                for (char c : caminho_minimo_floyd)
+                {
                     arquivo << c;
-                    if(c != id_no_2) arquivo << ",";
+                    if (c != id_no_2)
+                        arquivo << ",";
                 }
                 arquivo.close();
-                cout << "Resultado salvo em caminho_minimo_floyd.txt" << endl<< endl;
+                cout << "Resultado salvo em caminho_minimo_floyd.txt" << endl
+                     << endl;
             }
-            else cout << "Erro ao abrir o arquivo!" << endl<< endl;
+            else
+                cout << "Erro ao abrir o arquivo!" << endl
+                     << endl;
         }
 
         break;
@@ -385,14 +399,45 @@ bool Gerenciador::pergunta_imprimir_arquivo(string nome_arquivo)
 
 void Gerenciador::imprimeListaAdj(Grafo *grafo)
 {
-    cout << "+-+-----------\n";
-    for (No *no : grafo->getListaAdj())
+    // Prepara novo objeto para impressão, possibilitando manipulação sem alteração do objeto original
+    Grafo *grafo_impressao;
+    if (!grafo->getInDirecionado())
     {
-        cout << "|" << no->getId() << "|";
+        vector<No *> lista_adj;
+
+        // Reescrita da lista de adjacencia, para não alterar os nós originais
+        for (No *no : grafo->getListaAdj())
+            lista_adj.emplace_back(new No(no->getId(), no->getPeso(), no->getArestas()));
+
+        grafo_impressao = new Grafo(grafo->getOrdem(), grafo->getInDirecionado(), grafo->getInPonderadoAresta(), grafo->getInPonderadoVertice(), lista_adj);
+
+        // Colando as arestas também nos alvos, em caso de grafo não direcionado
+        for (No *no : lista_adj)
+        {
+            for (Aresta *aresta : no->getArestas())
+            {
+                No *no_aux = grafo_impressao->getNoPorId(aresta->getIdNoAlvo());
+                no_aux->setAresta(new Aresta(aresta->getIdNoAlvo(), aresta->getIdNoOrigem(), aresta->getPeso()));
+            }
+        }
+    }
+
+    cout << "---------------------------------------------------------\n";
+    for (No *no : grafo_impressao->getListaAdj())
+    {
+        cout << "|" << no->getId();
+        if (grafo_impressao->getInPonderadoVertice())
+            cout << "(" << no->getPeso() << ")";
+        cout << "|";
         for (Aresta *aresta : no->getArestas())
-            cout << aresta->getIdNoAlvo() << " ";
+        {
+            cout << aresta->getIdNoAlvo();
+            if (grafo_impressao->getInPonderadoAresta())
+                cout << "(" << aresta->getPeso() << ")";
+            cout << " ";
+        }
         cout << endl;
     }
 
-    cout << "+-+-----------\n";
+    cout << "---------------------------------------------------------\n";
 }
