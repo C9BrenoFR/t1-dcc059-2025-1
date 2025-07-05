@@ -20,7 +20,10 @@ Grafo::Grafo(int ordem, string regras, vector<string> lista_vertices, vector<str
 
     for (string lista_vertice : lista_vertices)
     {
-        No *vertice = new No(lista_vertice[0], in_ponderado_vertice ? stoi(lista_vertice.substr(2)) : 0);
+        int peso = 0;
+        if (in_ponderado_vertice && lista_vertice.size() > 2)
+            peso = stoi(lista_vertice.substr(2));
+        No *vertice = new No(lista_vertice[0], peso);
         lista_adj.emplace_back(vertice);
     }
 
@@ -29,7 +32,12 @@ Grafo::Grafo(int ordem, string regras, vector<string> lista_vertices, vector<str
         for (No *vertice : lista_adj)
         {
             if (vertice->getId() == lista_aresta[0])
-                vertice->setAresta(new Aresta(vertice->getId(), lista_aresta[2], in_ponderado_aresta ? stoi(lista_aresta.substr(4)) : 0));
+            {
+                int peso = 0;
+                if (in_ponderado_aresta && lista_aresta.size() > 4)
+                    peso = stoi(lista_aresta.substr(4));
+                vertice->setAresta(new Aresta(vertice->getId(), lista_aresta[2], peso));
+            }
         }
     }
 }
@@ -132,52 +140,65 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
     return resultado;
 }
 
-vector<char> Grafo::fecho_transitivo_indireto(int id_no) {
+vector<char> Grafo::fecho_transitivo_indireto(int id_no)
+{
     char id_char = static_cast<char>(id_no);
-    No* no_inicial = getNoPorId(id_char);
-    if (!no_inicial) return {};
+    No *no_inicial = getNoPorId(id_char);
+    if (!no_inicial)
+        return {};
 
     unordered_set<char> visitados;
-    stack<No*> pilha;
+    stack<No *> pilha;
     pilha.push(no_inicial);
 
-    while (!pilha.empty()) {
-        No* atual = pilha.top();
+    while (!pilha.empty())
+    {
+        No *atual = pilha.top();
         pilha.pop();
 
-        if (visitados.find(atual->getId()) != visitados.end()) 
+        if (visitados.find(atual->getId()) != visitados.end())
             continue;
-            
+
         visitados.insert(atual->getId());
 
         // Para cada nó no grafo
-        for (No* no : lista_adj) {
+        for (No *no : lista_adj)
+        {
             // Para cada aresta do nó
-            for (Aresta* aresta : no->getArestas()) {
+            for (Aresta *aresta : no->getArestas())
+            {
                 char origem = aresta->getIdNoOrigem();
                 char destino = aresta->getIdNoAlvo();
                 bool conexao_valida = false;
-                No* vizinho = nullptr;
+                No *vizinho = nullptr;
 
-                if (in_direcionado) {
+                if (in_direcionado)
+                {
                     // Grafo direcionado: busca predecessores (arestas que chegam no nó atual)
-                    if (destino == atual->getId()) {
+                    if (destino == atual->getId())
+                    {
                         conexao_valida = true;
-                        vizinho = no;  // 'no' é a origem da aresta que chega em 'atual'
+                        vizinho = no; // 'no' é a origem da aresta que chega em 'atual'
                     }
-                } else {
+                }
+                else
+                {
                     // Grafo não direcionado: busca qualquer conexão
-                    if (origem == atual->getId()) {
+                    if (origem == atual->getId())
+                    {
                         conexao_valida = true;
                         vizinho = getNoPorId(destino);
-                    } else if (destino == atual->getId()) {
+                    }
+                    else if (destino == atual->getId())
+                    {
                         conexao_valida = true;
                         vizinho = getNoPorId(origem);
                     }
                 }
 
-                if (conexao_valida && vizinho && 
-                    visitados.find(vizinho->getId()) == visitados.end()) {
+                if (conexao_valida && vizinho &&
+                    visitados.find(vizinho->getId()) == visitados.end())
+                {
                     pilha.push(vizinho);
                 }
             }
@@ -188,7 +209,6 @@ vector<char> Grafo::fecho_transitivo_indireto(int id_no) {
     visitados.erase(id_char);
     return vector<char>(visitados.begin(), visitados.end());
 }
-
 
 vector<char> Grafo::caminho_minimo_dijkstra(int id_no_a, int id_no_b)
 {
@@ -570,23 +590,59 @@ Grafo *Grafo::arvore_caminhamento_profundidade(int id_no)
 
         marcado.insert(id_atual);
         visitados.push_back(id_atual);
+
         if (pai != '\0')
         {
-            arestas_arvore.emplace_back(
-                string(1, pai) + " " + string(1, id_atual));
+            arestas_arvore.emplace_back(string(1, pai) + " " + string(1, id_atual));
         }
 
-        auto adj = atual->getArestas();
-        for (size_t i = adj.size(); i-- > 0;)
+        // Obter os vizinhos manualmente dependendo se o grafo é direcionado ou não
+        vector<No *> vizinhos;
+        unordered_set<char> adicionados;
+
+        // Arestas de saída (sempre existem)
+        for (Aresta *a : atual->getArestas())
         {
-            No *proximo = getNoPorId(adj[i]->getIdNoAlvo());
-            if (proximo && !marcado.count(proximo->getId()))
+            char id_alvo = a->getIdNoAlvo();
+            if (!marcado.count(id_alvo) && !adicionados.count(id_alvo))
             {
-                pilha.push({proximo, id_atual});
+                No *proximo = getNoPorId(id_alvo);
+                if (proximo)
+                {
+                    vizinhos.push_back(proximo);
+                    adicionados.insert(id_alvo);
+                }
             }
+        }
+
+        // Se for não direcionado, também considerar as arestas de entrada
+        if (!in_direcionado)
+        {
+            for (No *no : lista_adj)
+            {
+                for (Aresta *a : no->getArestas())
+                {
+                    if (a->getIdNoAlvo() == id_atual)
+                    {
+                        char id_origem = no->getId();
+                        if (!marcado.count(id_origem) && !adicionados.count(id_origem))
+                        {
+                            vizinhos.push_back(no);
+                            adicionados.insert(id_origem);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Inserir na pilha em ordem reversa (opcional para manter comportamento semelhante)
+        for (size_t i = vizinhos.size(); i-- > 0;)
+        {
+            pilha.push({vizinhos[i], id_atual});
         }
     }
 
+    // Construção da lista de vértices
     vector<string> vertices_arvore;
     for (char id : visitados)
     {
@@ -597,9 +653,9 @@ Grafo *Grafo::arvore_caminhamento_profundidade(int id_no)
         vertices_arvore.push_back(s);
     }
 
-    string regras = "1 " +
-                    string(in_ponderado_aresta ? "1" : "0") + " " +
-                    string(in_ponderado_vertice ? "1" : "0");
+    string regras = (in_direcionado ? "1" : "0") + string(" ") +
+                    (in_ponderado_aresta ? "1" : "0") + string(" ") +
+                    (in_ponderado_vertice ? "1" : "0");
 
     return new Grafo(visitados.size(), regras, vertices_arvore, arestas_arvore);
 }

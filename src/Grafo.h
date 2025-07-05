@@ -47,8 +47,6 @@ public:
     bool getInDirecionado();
     bool getInPonderadoAresta();
     bool getInPonderadoVertice();
-    vector<No*> getPredecessoresDirecionados(No* atual);
-    vector<No*> getVizinhosNaoDirecionados(No* atual);
 };
 
 #endif // GRAFO_H
