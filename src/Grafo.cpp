@@ -7,6 +7,7 @@
 #include <set>
 #include <map>
 #include <unordered_set>
+#include <algorithm>
 
 using namespace std;
 
@@ -82,7 +83,7 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
     if (!inicio)
         return {};
 
-    vector<char> visitados;
+    unordered_set<char> visitados;
     stack<No *> pilha;
     pilha.push(inicio);
 
@@ -91,37 +92,32 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
         No *atual = pilha.top();
         pilha.pop();
 
-        bool ja_visitado = false;
-        for (char v : visitados)
-        {
-            if (v == atual->getId())
-            {
-                ja_visitado = true;
-                break;
-            }
-        }
-        if (ja_visitado)
+        if (visitados.count(atual->getId()))
             continue;
 
-        visitados.push_back(atual->getId());
+        visitados.insert(atual->getId());
 
         for (Aresta *aresta : atual->getArestas())
         {
             No *proximo = getNoPorId(aresta->getIdNoAlvo());
-            if (proximo)
+            if (proximo && !visitados.count(proximo->getId()))
             {
-                bool visitado = false;
-                for (char v : visitados)
+                pilha.push(proximo);
+            }
+        }
+
+        // Se o grafo não for direcionado, considerar as conexões "entrando"
+        if (!this->getInDirecionado())
+        {
+            for (No *vizinho : this->getListaAdj())
+            {
+                for (Aresta *aresta : vizinho->getArestas())
                 {
-                    if (v == proximo->getId())
+                    if (aresta->getIdNoAlvo() == atual->getId())
                     {
-                        visitado = true;
-                        break;
+                        if (!visitados.count(vizinho->getId()))
+                            pilha.push(vizinho);
                     }
-                }
-                if (!visitado)
-                {
-                    pilha.push(proximo);
                 }
             }
         }
@@ -131,77 +127,68 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
     for (char c : visitados)
     {
         if (c != id_char)
-        {
             resultado.push_back(c);
-        }
     }
     return resultado;
 }
 
-vector<char> Grafo::fecho_transitivo_indireto(int id_no)
-{
-    char id_char = id_no;
-    No *alvo = getNoPorId(id_char);
-    if (!alvo)
-        return {};
+vector<char> Grafo::fecho_transitivo_indireto(int id_no) {
+    char id_char = static_cast<char>(id_no);
+    No* no_inicial = getNoPorId(id_char);
+    if (!no_inicial) return {};
 
-    vector<char> visitados;
-    stack<No *> pilha;
-    pilha.push(alvo);
+    unordered_set<char> visitados;
+    stack<No*> pilha;
+    pilha.push(no_inicial);
 
-    while (!pilha.empty())
-    {
-        No *atual = pilha.top();
+    while (!pilha.empty()) {
+        No* atual = pilha.top();
         pilha.pop();
 
-        bool ja_visitado = false;
-        for (char v : visitados)
-        {
-            if (v == atual->getId())
-            {
-                ja_visitado = true;
-                break;
-            }
-        }
-        if (ja_visitado)
+        if (visitados.find(atual->getId()) != visitados.end()) 
             continue;
+            
+        visitados.insert(atual->getId());
 
-        visitados.push_back(atual->getId());
+        // Para cada nó no grafo
+        for (No* no : lista_adj) {
+            // Para cada aresta do nó
+            for (Aresta* aresta : no->getArestas()) {
+                char origem = aresta->getIdNoOrigem();
+                char destino = aresta->getIdNoAlvo();
+                bool conexao_valida = false;
+                No* vizinho = nullptr;
 
-        for (No *no : lista_adj)
-        {
-            for (Aresta *aresta : no->getArestas())
-            {
-                if (aresta->getIdNoAlvo() == atual->getId())
-                {
-                    bool visitado = false;
-                    for (char v : visitados)
-                    {
-                        if (v == no->getId())
-                        {
-                            visitado = true;
-                            break;
-                        }
+                if (in_direcionado) {
+                    // Grafo direcionado: busca predecessores (arestas que chegam no nó atual)
+                    if (destino == atual->getId()) {
+                        conexao_valida = true;
+                        vizinho = no;  // 'no' é a origem da aresta que chega em 'atual'
                     }
-                    if (!visitado)
-                    {
-                        pilha.push(no);
+                } else {
+                    // Grafo não direcionado: busca qualquer conexão
+                    if (origem == atual->getId()) {
+                        conexao_valida = true;
+                        vizinho = getNoPorId(destino);
+                    } else if (destino == atual->getId()) {
+                        conexao_valida = true;
+                        vizinho = getNoPorId(origem);
                     }
+                }
+
+                if (conexao_valida && vizinho && 
+                    visitados.find(vizinho->getId()) == visitados.end()) {
+                    pilha.push(vizinho);
                 }
             }
         }
     }
 
-    vector<char> resultado;
-    for (char c : visitados)
-    {
-        if (c != id_char)
-        {
-            resultado.push_back(c);
-        }
-    }
-    return resultado;
+    // Remove o nó inicial do resultado
+    visitados.erase(id_char);
+    return vector<char>(visitados.begin(), visitados.end());
 }
+
 
 vector<char> Grafo::caminho_minimo_dijkstra(int id_no_a, int id_no_b)
 {
