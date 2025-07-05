@@ -259,7 +259,6 @@ void Gerenciador::comandos(Grafo *grafo)
 
         if (arvore)
         {
-            // Imprimir na tela
             cout << "Arvore de caminhamento em profundidade a partir de " << id_no << ":" << endl;
             for (No *no : arvore->getListaAdj())
             {
@@ -272,7 +271,6 @@ void Gerenciador::comandos(Grafo *grafo)
             }
             cout << endl;
 
-            // Salvar em arquivo se solicitado
             if (pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt"))
             {
                 ofstream arquivo("arvore_caminhamento_profundidade.txt");
