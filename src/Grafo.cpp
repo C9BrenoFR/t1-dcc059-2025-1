@@ -367,7 +367,7 @@ Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
         if (no->getId() == ids_nos[0])
             agm.emplace_back(new No(no->getId(), no->getPeso()));
     algoritimo_prim(agm, ids_nos, ids_nos.size());
-    Grafo *grafo = new Grafo(ordem, in_direcionado, in_ponderado_aresta, in_ponderado_vertice, agm);
+    Grafo *grafo = new Grafo(ordem, true, in_ponderado_aresta, false, agm);
     return grafo;
 }
 
@@ -477,7 +477,7 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
         }
     }
 
-    Grafo *grafo = new Grafo(ordem, in_direcionado, in_ponderado_aresta, in_ponderado_vertice, agm);
+    Grafo *grafo = new Grafo(ordem, true, in_ponderado_aresta, false, agm);
     return grafo;
 }
 

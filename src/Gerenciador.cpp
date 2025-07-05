@@ -189,9 +189,18 @@ void Gerenciador::comandos(Grafo *grafo)
         {
 
             vector<char> ids = get_conjunto_ids(grafo, tam);
+            cout << "CHEGOU 1" << endl;
             Grafo *arvore_geradora_minima_prim = grafo->arvore_geradora_minima_prim(ids);
-            imprimeListaAdj(arvore_geradora_minima_prim);
+            cout << "CHEGOU 2" << endl;
 
+            if (arvore_geradora_minima_prim == nullptr)
+            {
+                cout << "Não é possivel calcular AGM de um grafo que não possui arestas ponderadas" << endl;
+                break;
+            }
+            cout << "CHEGOU 3" << endl;
+            imprimeListaAdj(arvore_geradora_minima_prim);
+            cout << "CHEGOU 4" << endl;
             if (pergunta_imprimir_arquivo("agm_prim.txt"))
             {
                 cout << "Metodo de impressao em arquivo nao implementado" << endl;
@@ -219,6 +228,13 @@ void Gerenciador::comandos(Grafo *grafo)
 
             vector<char> ids = get_conjunto_ids(grafo, tam);
             Grafo *arvore_geradora_minima_kruskal = grafo->arvore_geradora_minima_kruskal(ids);
+
+            if (arvore_geradora_minima_kruskal == nullptr)
+            {
+                cout << "Não é possivel calcular AGM de um grafo que não possui arestas ponderadas" << endl;
+                break;
+            }
+
             imprimeListaAdj(arvore_geradora_minima_kruskal);
 
             if (pergunta_imprimir_arquivo("agm_kruskal.txt"))
@@ -399,8 +415,7 @@ bool Gerenciador::pergunta_imprimir_arquivo(string nome_arquivo)
 
 void Gerenciador::imprimeListaAdj(Grafo *grafo)
 {
-    // Prepara novo objeto para impressão, possibilitando manipulação sem alteração do objeto original
-    Grafo *grafo_impressao;
+    Grafo *grafo_impressao = grafo;
     if (!grafo->getInDirecionado())
     {
         vector<No *> lista_adj;
@@ -409,10 +424,11 @@ void Gerenciador::imprimeListaAdj(Grafo *grafo)
         for (No *no : grafo->getListaAdj())
             lista_adj.emplace_back(new No(no->getId(), no->getPeso(), no->getArestas()));
 
+        // Prepara novo objeto para impressão, possibilitando manipulação sem alteração do objeto original
         grafo_impressao = new Grafo(grafo->getOrdem(), grafo->getInDirecionado(), grafo->getInPonderadoAresta(), grafo->getInPonderadoVertice(), lista_adj);
 
         // Colando as arestas também nos alvos, em caso de grafo não direcionado
-        for (No *no : lista_adj)
+        for (No *no : grafo->getListaAdj())
         {
             for (Aresta *aresta : no->getArestas())
             {

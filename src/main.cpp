@@ -51,8 +51,9 @@ int main(int argc, char *argv[])
     }
 
     Grafo *grafo = new Grafo(ordem, regras, vertices, arestas);
+    cout << "Grafo escolhido: " << endl;
     Gerenciador::imprimeListaAdj(grafo);
-    // Gerenciador::comandos(grafo);
+    Gerenciador::comandos(grafo);
 
     return 0;
 }
