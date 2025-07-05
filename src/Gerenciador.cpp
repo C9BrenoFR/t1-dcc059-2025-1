@@ -189,18 +189,14 @@ void Gerenciador::comandos(Grafo *grafo)
         {
 
             vector<char> ids = get_conjunto_ids(grafo, tam);
-            cout << "CHEGOU 1" << endl;
             Grafo *arvore_geradora_minima_prim = grafo->arvore_geradora_minima_prim(ids);
-            cout << "CHEGOU 2" << endl;
 
             if (arvore_geradora_minima_prim == nullptr)
             {
                 cout << "Não é possivel calcular AGM de um grafo que não possui arestas ponderadas" << endl;
                 break;
             }
-            cout << "CHEGOU 3" << endl;
             imprimeListaAdj(arvore_geradora_minima_prim);
-            cout << "CHEGOU 4" << endl;
             if (pergunta_imprimir_arquivo("agm_prim.txt"))
             {
                 cout << "Metodo de impressao em arquivo nao implementado" << endl;
