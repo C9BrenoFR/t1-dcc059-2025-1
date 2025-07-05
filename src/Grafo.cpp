@@ -91,7 +91,7 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
     if (!inicio)
         return {};
 
-    unordered_set<char> visitados;
+    unordered_set<char> visitados;  // Conjunto de nós visitados
     stack<No *> pilha;
     pilha.push(inicio);
 
@@ -105,6 +105,7 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
 
         visitados.insert(atual->getId());
 
+         // Percorre as arestas de saída
         for (Aresta *aresta : atual->getArestas())
         {
             No *proximo = getNoPorId(aresta->getIdNoAlvo());
@@ -114,7 +115,7 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
             }
         }
 
-        // Se o grafo não for direcionado, considerar as conexões "entrando"
+        // Se não direcionado, também considerar conexões que "entram" no nó
         if (!this->getInDirecionado())
         {
             for (No *vizinho : this->getListaAdj())
@@ -131,6 +132,7 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
         }
     }
 
+    // Constrói resultado ignorando o nó inicial
     vector<char> resultado;
     for (char c : visitados)
     {
@@ -147,7 +149,7 @@ vector<char> Grafo::fecho_transitivo_indireto(int id_no)
     if (!no_inicial)
         return {};
 
-    unordered_set<char> visitados;
+    unordered_set<char> visitados; // Conjunto de nós visitados
     stack<No *> pilha;
     pilha.push(no_inicial);
 
@@ -161,7 +163,7 @@ vector<char> Grafo::fecho_transitivo_indireto(int id_no)
 
         visitados.insert(atual->getId());
 
-        // Para cada nó no grafo
+        // Percorre todos os nós do grafo para verificar conexões que chegam em 'atual'
         for (No *no : lista_adj)
         {
             // Para cada aresta do nó
@@ -183,7 +185,7 @@ vector<char> Grafo::fecho_transitivo_indireto(int id_no)
                 }
                 else
                 {
-                    // Grafo não direcionado: busca qualquer conexão
+                    // Em grafos não direcionados, qualquer conexão é válida
                     if (origem == atual->getId())
                     {
                         conexao_valida = true;
@@ -196,6 +198,7 @@ vector<char> Grafo::fecho_transitivo_indireto(int id_no)
                     }
                 }
 
+                // Se a conexão é válida e ainda não visitada, adiciona à pilha
                 if (conexao_valida && vizinho &&
                     visitados.find(vizinho->getId()) == visitados.end())
                 {
@@ -573,34 +576,34 @@ Grafo *Grafo::arvore_caminhamento_profundidade(int id_no)
     if (!inicio)
         return nullptr;
 
-    unordered_set<char> marcado;
-    vector<char> visitados;
-    vector<string> arestas_arvore;
-    stack<pair<No *, char>> pilha;
-    pilha.push({inicio, '\0'});
+    unordered_set<char> marcado;   // Guarda nós já visitados
+    vector<char> visitados;        // Ordem dos nós visitados
+    vector<string> arestas_arvore; // Armazena as arestas da árvore de caminhamento
+    stack<pair<No *, char>> pilha; // Pilha para DFS, com par (nó atual, pai)
+    pilha.push({inicio, '\0'});    // '\0' como pai do nó inicial
 
     while (!pilha.empty())
     {
-        auto [atual, pai] = pilha.top();
+        auto [atual, pai] = pilha.top(); // Obtém o topo da pilha
         pilha.pop();
 
         char id_atual = atual->getId();
-        if (marcado.count(id_atual))
+        if (marcado.count(id_atual)) // Se já foi visitado, ignora
             continue;
 
         marcado.insert(id_atual);
-        visitados.push_back(id_atual);
+        visitados.push_back(id_atual); // Marca como visitado
 
-        if (pai != '\0')
+        if (pai != '\0') // Se não é o nó inicial, registra a aresta (pai -> atual)
         {
             arestas_arvore.emplace_back(string(1, pai) + " " + string(1, id_atual));
         }
 
-        // Obter os vizinhos manualmente dependendo se o grafo é direcionado ou não
+        // Coleta os vizinhos ainda não visitados
         vector<No *> vizinhos;
-        unordered_set<char> adicionados;
+        unordered_set<char> adicionados; // Evita adicionar o mesmo nó duas vezes
 
-        // Arestas de saída (sempre existem)
+        // Sempre considera arestas de saída
         for (Aresta *a : atual->getArestas())
         {
             char id_alvo = a->getIdNoAlvo();
@@ -615,7 +618,7 @@ Grafo *Grafo::arvore_caminhamento_profundidade(int id_no)
             }
         }
 
-        // Se for não direcionado, também considerar as arestas de entrada
+        // Se for não direcionado, também considera arestas de entrada
         if (!in_direcionado)
         {
             for (No *no : lista_adj)
@@ -635,14 +638,14 @@ Grafo *Grafo::arvore_caminhamento_profundidade(int id_no)
             }
         }
 
-        // Inserir na pilha em ordem reversa (opcional para manter comportamento semelhante)
+        // Adiciona os vizinhos à pilha em ordem reversa (opcional: para manter ordem de visita)
         for (size_t i = vizinhos.size(); i-- > 0;)
         {
             pilha.push({vizinhos[i], id_atual});
         }
     }
 
-    // Construção da lista de vértices
+    // Monta os vértices com ou sem pesos
     vector<string> vertices_arvore;
     for (char id : visitados)
     {
@@ -653,10 +656,12 @@ Grafo *Grafo::arvore_caminhamento_profundidade(int id_no)
         vertices_arvore.push_back(s);
     }
 
+    // Regras do grafo (direcionado, arestas ponderadas, vértices ponderados)
     string regras = (in_direcionado ? "1" : "0") + string(" ") +
                     (in_ponderado_aresta ? "1" : "0") + string(" ") +
                     (in_ponderado_vertice ? "1" : "0");
 
+    // Retorna o novo grafo representando a árvore de caminhamento
     return new Grafo(visitados.size(), regras, vertices_arvore, arestas_arvore);
 }
 
