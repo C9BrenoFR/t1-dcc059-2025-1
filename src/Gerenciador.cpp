@@ -1,5 +1,6 @@
 #include "Gerenciador.h"
 #include <fstream>
+#include <map>
 
 void Gerenciador::comandos(Grafo *grafo)
 {
@@ -301,17 +302,22 @@ void Gerenciador::comandos(Grafo *grafo)
 
     case 'h':
     {
-        vector<char> articulacao = grafo->vertices_de_articulacao();
-        cout << "Metodo de impressao em tela nao implementado" << endl
-             << endl;
+        map<char, int> excentricidades = grafo->calcular_excentricidades();
 
-        if (pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt"))
+        cout << "Excentricidades dos vertices:" << endl;
+        for (auto &par : excentricidades) {
+            cout << "Vertice " << par.first << ": " << par.second << endl;
+        }
+        cout << endl;
+
+        if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))
         {
             cout << "Metodo de impressao em arquivo nao implementado" << endl;
         }
 
         break;
     }
+
     case 'i':
     {
 
@@ -332,9 +338,9 @@ void Gerenciador::comandos(Grafo *grafo)
         exit(0);
     }
     default:
-    {
-        cout << "Opção inválida" << endl;
-    }
+        {
+            cout << "Opção inválida" << endl;
+        }
     }
 
     comandos(grafo);
