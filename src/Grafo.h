@@ -21,7 +21,7 @@ private:
     vector<No *> lista_adj;
     vector<Aresta *> getListaArestaOrdenada(vector<char> id_nos);
     void ordenaListaAresta(vector<Aresta *> &lista, int min, int max);
-    void algoritimo_prim(vector<No *> &agm, vector<char> ids_nos, size_t max);
+    void algoritimo_prim(vector<No *> &agm, vector<char> ids_nos);
 
 public:
     Grafo(int ordem, string regras, vector<string> lista_vertices, vector<string> lista_arestas);

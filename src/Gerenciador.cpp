@@ -1,7 +1,7 @@
 #include "Gerenciador.h"
 #include <fstream>
 
-void Gerenciador::comandos(Grafo *grafo)
+void Gerenciador::comandos(Grafo *grafo, string pasta)
 {
     cout << "Digite uma das opcoes abaixo e pressione enter:" << endl
          << endl;
@@ -199,7 +199,7 @@ void Gerenciador::comandos(Grafo *grafo)
             imprimeListaAdj(arvore_geradora_minima_prim);
             if (pergunta_imprimir_arquivo("agm_prim.txt"))
             {
-                cout << "Metodo de impressao em arquivo nao implementado" << endl;
+                salvaListaAdj(arvore_geradora_minima_prim, pasta + "/agm_prim.txt");
             }
 
             delete arvore_geradora_minima_prim;
@@ -235,7 +235,7 @@ void Gerenciador::comandos(Grafo *grafo)
 
             if (pergunta_imprimir_arquivo("agm_kruskal.txt"))
             {
-                cout << "Metodo de impressao em arquivo nao implementado" << endl;
+                salvaListaAdj(arvore_geradora_minima_kruskal, pasta + "/agm_kruskal.txt");
             }
 
             delete arvore_geradora_minima_kruskal;
@@ -255,39 +255,11 @@ void Gerenciador::comandos(Grafo *grafo)
 
         if (arvore)
         {
-            cout << "Arvore de caminhamento em profundidade a partir de " << id_no << ":" << endl;
-            for (No *no : arvore->getListaAdj())
-            {
-                cout << no->getId() << " -> ";
-                for (Aresta *aresta : no->getArestas())
-                {
-                    cout << aresta->getIdNoAlvo() << " ";
-                }
-                cout << endl;
-            }
-            cout << endl;
+            imprimeListaAdj(arvore);
 
             if (pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt"))
             {
-                ofstream arquivo("arvore_caminhamento_profundidade.txt");
-                if (arquivo.is_open())
-                {
-                    for (No *no : arvore->getListaAdj())
-                    {
-                        arquivo << no->getId() << " -> ";
-                        for (Aresta *aresta : no->getArestas())
-                        {
-                            arquivo << aresta->getIdNoAlvo() << " ";
-                        }
-                        arquivo << endl;
-                    }
-                    arquivo.close();
-                    cout << "Arvore salva em arvore_caminhamento_profundidade.txt" << endl;
-                }
-                else
-                {
-                    cout << "Erro ao abrir o arquivo!" << endl;
-                }
+                salvaListaAdj(grafo, pasta + "/arvore_caminhamento_profundidade.txt");
             }
         }
         else
@@ -337,7 +309,7 @@ void Gerenciador::comandos(Grafo *grafo)
     }
     }
 
-    comandos(grafo);
+    comandos(grafo, pasta);
 }
 
 char Gerenciador::get_id_entrada()
@@ -432,22 +404,117 @@ void Gerenciador::imprimeListaAdj(Grafo *grafo)
         }
     }
 
-    cout << "---------------------------------------------------------\n";
     for (No *no : grafo_impressao->getListaAdj())
     {
-        cout << "|" << no->getId();
-        if (grafo_impressao->getInPonderadoVertice())
-            cout << "(" << no->getPeso() << ")";
-        cout << "|";
-        for (Aresta *aresta : no->getArestas())
+        cout << no->getId() << ": ";
+        vector<Aresta *> arestas = no->getArestas();
+        for (int i = 0; i < arestas.size(); i++)
         {
-            cout << aresta->getIdNoAlvo();
-            if (grafo_impressao->getInPonderadoAresta())
-                cout << "(" << aresta->getPeso() << ")";
-            cout << " ";
+            cout << arestas[i]->getIdNoAlvo();
+            if (i != arestas.size() - 1)
+                cout << " -> ";
         }
         cout << endl;
     }
+}
 
-    cout << "---------------------------------------------------------\n";
+void Gerenciador::salvaListaAdj(Grafo *grafo, string caminho)
+{
+    ofstream arquivo(caminho);
+
+    if (!arquivo.is_open())
+    {
+        cout << "Erro ao abrir o arquivo " << caminho << " para escrita!" << endl;
+        return;
+    }
+
+    Grafo *grafo_impressao = grafo;
+    if (!grafo->getInDirecionado())
+    {
+        vector<No *> lista_adj;
+
+        // Reescrita da lista de adjacencia, para não alterar os nós originais
+        for (No *no : grafo->getListaAdj())
+            lista_adj.emplace_back(new No(no->getId(), no->getPeso(), no->getArestas()));
+
+        // Prepara novo objeto para impressão, possibilitando manipulação sem alteração do objeto original
+        grafo_impressao = new Grafo(grafo->getOrdem(), grafo->getInDirecionado(), grafo->getInPonderadoAresta(), grafo->getInPonderadoVertice(), lista_adj);
+
+        // Colando as arestas também nos alvos, em caso de grafo não direcionado
+        for (No *no : grafo->getListaAdj())
+        {
+            for (Aresta *aresta : no->getArestas())
+            {
+                No *no_aux = grafo_impressao->getNoPorId(aresta->getIdNoAlvo());
+                no_aux->setAresta(new Aresta(aresta->getIdNoAlvo(), aresta->getIdNoOrigem(), aresta->getPeso()));
+            }
+        }
+    }
+
+    for (No *no : grafo_impressao->getListaAdj())
+    {
+        arquivo << no->getId() << ": ";
+        vector<Aresta *> arestas = no->getArestas();
+        for (int i = 0; i < arestas.size(); i++)
+        {
+            arquivo << arestas[i]->getIdNoAlvo();
+            if (i != arestas.size() - 1)
+                arquivo << " -> ";
+        }
+        arquivo << endl;
+    }
+
+    arquivo.close();
+    cout << "Lista de adjacência salva em " << caminho << endl;
+}
+
+void Gerenciador::imprimeVetorChar(vector<char> lista)
+{
+    for (int i = 0; i < lista.size(); i++)
+    {
+        cout << lista[i];
+        if (lista.size() - 1 == i)
+            cout << ",";
+    }
+    cout << endl;
+}
+
+void Gerenciador::salvaVetorChar(vector<char> lista, string caminho)
+{
+    ofstream arquivo(caminho);
+    if (!arquivo.is_open())
+    {
+        cout << "Erro ao abrir o arquivo " << caminho << " para escrita!" << endl;
+        return;
+    }
+
+    for (int i = 0; i < lista.size(); i++)
+    {
+        arquivo << lista[i];
+        if (lista.size() - 1 == i)
+            arquivo << ",";
+    }
+    arquivo << endl;
+}
+
+void Gerenciador::imprimeExcentricidade(int raio, int diametro, vector<char> centro, vector<char> periferia)
+{
+    cout << raio << endl
+         << diametro << endl;
+    imprimeVetorChar(centro);
+    imprimeVetorChar(periferia);
+}
+
+void Gerenciador::salvaExcentricidade(int raio, int diametro, vector<char> centro, vector<char> periferia, string caminho)
+{
+    ofstream arquivo(caminho);
+    if (!arquivo.is_open())
+    {
+        cout << "Erro ao abrir o arquivo " << caminho << " para escrita!" << endl;
+        return;
+    }
+    arquivo << raio << endl
+            << diametro << endl;
+    salvaVetorChar(centro, caminho);
+    salvaVetorChar(periferia, caminho);
 }

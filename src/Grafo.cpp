@@ -370,20 +370,22 @@ vector<char> Grafo::caminho_minimo_floyd(int id_no, int id_no_b)
 
 Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
 {
+    // Retorna nulo caso o grafo não seja ponderado
     if (!in_ponderado_aresta)
         return nullptr;
     vector<No *> agm = {};
+    // Cria cópia dos nós para evitar alterações no grafo original
     for (No *no : this->lista_adj)
         if (no->getId() == ids_nos[0])
             agm.emplace_back(new No(no->getId(), no->getPeso()));
-    algoritimo_prim(agm, ids_nos, ids_nos.size());
-    Grafo *grafo = new Grafo(ordem, true, in_ponderado_aresta, false, agm);
-    return grafo;
+    algoritimo_prim(agm, ids_nos);
+    return new Grafo(ordem, in_direcionado, in_ponderado_aresta, in_ponderado_vertice, agm);
 }
 
-void Grafo::algoritimo_prim(vector<No *> &agm, vector<char> ids_nos, size_t max)
+void Grafo::algoritimo_prim(vector<No *> &agm, vector<char> ids_nos)
 {
-    if (agm.size() == max)
+    // Retotna caso ja tenha encontrado todos os nós
+    if (agm.size() == ids_nos.size())
         return;
     vector<Aresta *> lista_arestas;
     for (No *no_agm : agm)
@@ -392,8 +394,10 @@ void Grafo::algoritimo_prim(vector<No *> &agm, vector<char> ids_nos, size_t max)
         {
             for (Aresta *aresta : no_lista->getArestas())
             {
+                // Procura por aresta que no_lista participa
                 if (aresta->getIdNoAlvo() == no_agm->getId() || aresta->getIdNoOrigem() == no_agm->getId())
                 {
+                    // Verificação para exlcuir arestas de nós não selecionados para o subgrafo
                     bool origem_valida = false, alvo_valido = false;
                     for (char id_no : ids_nos)
                     {
@@ -403,12 +407,14 @@ void Grafo::algoritimo_prim(vector<No *> &agm, vector<char> ids_nos, size_t max)
                             alvo_valido = true;
                     }
 
+                    // Salva como aresta disponivel
                     if (origem_valida && alvo_valido)
                         lista_arestas.emplace_back(aresta);
                 }
             }
         }
     }
+    // Ordena arestas do menor para o maior peso para escolher
     ordenaListaAresta(lista_arestas, 0, lista_arestas.size() - 1);
     for (Aresta *aresta : lista_arestas)
     {
@@ -417,6 +423,7 @@ void Grafo::algoritimo_prim(vector<No *> &agm, vector<char> ids_nos, size_t max)
         No *no_aux = nullptr;
         for (No *no : agm)
         {
+            // Procura a primeira aresta (menor peso) que tenha um novo nó
             if (no->getId() == aresta->getIdNoOrigem())
             {
                 origem_valida = false;
@@ -430,27 +437,34 @@ void Grafo::algoritimo_prim(vector<No *> &agm, vector<char> ids_nos, size_t max)
         }
         if (alvo_valido)
         {
+            // Se o alvo é valido, então a origem ja está descoberta, e foi salva no nó auxiliar e salva o novo nó sem arestas, ja que ainda não foi origem
             no_aux->setAresta(aresta);
             agm.emplace_back(new No(aresta->getIdNoAlvo(), 0));
             break;
         }
         else if (origem_valida)
         {
+            // Se a origem é valida, então não foi descoberta, logo, um novo nó é criado para receber a aresta, e é adiciona a agm
             No *novo_no = new No(aresta->getIdNoOrigem(), 0, {aresta});
             agm.emplace_back(novo_no);
             break;
         }
     }
 
-    algoritimo_prim(agm, ids_nos, max);
+    // Repete a execução para agm com o novo nó descoberto
+    algoritimo_prim(agm, ids_nos);
 }
 
 Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
 {
+    // Retorna nulo caso o grafo não seja ponderado
     if (!in_ponderado_aresta)
         return nullptr;
+
+    // Ordena lista de arestas
     vector<Aresta *> lista_arestas_ordenadas = getListaArestaOrdenada(ids_nos);
 
+    // Cria grafo cópia sem arestas
     vector<No *> agm;
     for (No *no_original : lista_adj)
     {
@@ -458,11 +472,13 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
         agm.push_back(no_copia);
     }
 
+    // Percorre todas as arestas ja ordenadas
     vector<char> nos_encontrados;
-
     for (Aresta *aresta : lista_arestas_ordenadas)
     {
         bool encontrou_origem = false, encontrou_alvo = false;
+
+        // Checa se o nó ja foi encontrado
         for (char no : nos_encontrados)
         {
             if (aresta->getIdNoOrigem() == no)
@@ -470,8 +486,11 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
             else if (aresta->getIdNoAlvo() == no)
                 encontrou_alvo = true;
         }
+
+        // Caso pelo menos um nó seja novo, salva aresta (dois nós novos geraria um ciclo)
         if (!encontrou_origem || !encontrou_alvo)
         {
+            // Salva a aresta na respectiva origem.
             for (No *no : agm)
             {
                 if (no->getId() == aresta->getIdNoOrigem())
@@ -480,15 +499,15 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
                     break;
                 }
             }
+
+            // Salva o novo nó na lista, sem repetições de nós
             if (!encontrou_origem)
                 nos_encontrados.emplace_back(aresta->getIdNoOrigem());
             if (!encontrou_alvo)
                 nos_encontrados.emplace_back(aresta->getIdNoAlvo());
         }
     }
-
-    Grafo *grafo = new Grafo(ordem, true, in_ponderado_aresta, false, agm);
-    return grafo;
+    return new Grafo(ordem, in_direcionado, in_ponderado_aresta, in_ponderado_vertice, agm);
 }
 
 vector<Aresta *> Grafo::getListaArestaOrdenada(vector<char> ids_nos)

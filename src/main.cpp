@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <filesystem>
 #include "colors.h"
 #include "Gerenciador.h"
 
@@ -53,7 +54,11 @@ int main(int argc, char *argv[])
     Grafo *grafo = new Grafo(ordem, regras, vertices, arestas);
     cout << "Grafo escolhido: " << endl;
     Gerenciador::imprimeListaAdj(grafo);
-    Gerenciador::comandos(grafo);
+
+    string nome_sem_extensao = string(argv[1]).substr(0, string(argv[1]).length() - 4);
+    std::filesystem::create_directory(nome_sem_extensao);
+
+    Gerenciador::comandos(grafo, nome_sem_extensao);
 
     return 0;
 }
