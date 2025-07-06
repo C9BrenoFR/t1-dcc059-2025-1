@@ -687,20 +687,22 @@ map<char, int> Grafo::calcular_excentricidades()
     vector<vector<int>> dist(n, vector<int>(n, INF));
     
     for (int i = 0; i < n; i++) {
-        dist[i][i] = 0; // Distância de um nó para ele mesmo é 0
-        
+        int peso_vertice_origem = in_ponderado_vertice ? lista_adj[i]->getPeso() : 0;
+        dist[i][i] = 0;
+
+
         for (Aresta *aresta : lista_adj[i]->getArestas()) {
             int j = id_para_indice[aresta->getIdNoAlvo()];
 
             int peso_aresta = in_ponderado_aresta ? aresta->getPeso() : 1;
-            int peso_vertice = in_ponderado_vertice ? lista_adj[j]->getPeso() : 0;
+            int peso_vertice_destino = in_ponderado_vertice ? lista_adj[j]->getPeso() : 0;
             
-            // Custo total: peso da aresta + peso do vértice destino
-            int custo_total = peso_aresta + peso_vertice;
-            dist[i][j] = custo_total;
+            // Custo total: APENAS peso da aresta + peso do vértice destino
+            dist[i][j] = peso_aresta + peso_vertice_destino;
             
             if (!in_direcionado) {
-                dist[j][i] = custo_total;
+                // Para grafos não direcionados, dist[j][i] deve usar peso do vértice i como destino
+                dist[j][i] = peso_aresta + peso_vertice_origem;
             }
         }
     }
@@ -720,21 +722,21 @@ map<char, int> Grafo::calcular_excentricidades()
     
     bool grafo_conectado = true;
     for (int i = 0; i < n && grafo_conectado; i++) {
+        int peso_vertice_origem = in_ponderado_vertice ? lista_adj[i]->getPeso() : 0;
+
         int excentricidade_atual = 0;
-        
         for (int j = 0; j < n; j++) {
             if (dist[i][j] == INF) {
                 grafo_conectado = false;
                 break;
             }
-            
-            // Calcula excentricidade durante a verificação
             if (i != j && dist[i][j] > excentricidade_atual) {
                 excentricidade_atual = dist[i][j];
             }
         }
-        
+
         if (grafo_conectado) {
+            excentricidade_atual += peso_vertice_origem;
             excentricidades[indice_para_id[i]] = excentricidade_atual;
         }
     }
