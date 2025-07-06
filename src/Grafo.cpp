@@ -691,7 +691,9 @@ map<char, int> Grafo::calcular_excentricidades()
         
         for (Aresta *aresta : lista_adj[i]->getArestas()) {
             int j = id_para_indice[aresta->getIdNoAlvo()];
-            dist[i][j] = aresta->getPeso();
+
+            int peso = in_ponderado_aresta ? aresta->getPeso() : 1;
+            dist[i][j] = peso;
             
             if (!in_direcionado) {
                 dist[j][i] = dist[i][j];
