@@ -692,11 +692,15 @@ map<char, int> Grafo::calcular_excentricidades()
         for (Aresta *aresta : lista_adj[i]->getArestas()) {
             int j = id_para_indice[aresta->getIdNoAlvo()];
 
-            int peso = in_ponderado_aresta ? aresta->getPeso() : 1;
-            dist[i][j] = peso;
+            int peso_aresta = in_ponderado_aresta ? aresta->getPeso() : 1;
+            int peso_vertice = in_ponderado_vertice ? lista_adj[j]->getPeso() : 0;
+            
+            // Custo total: peso da aresta + peso do vértice destino
+            int custo_total = peso_aresta + peso_vertice;
+            dist[i][j] = custo_total;
             
             if (!in_direcionado) {
-                dist[j][i] = dist[i][j];
+                dist[j][i] = custo_total;
             }
         }
     }
