@@ -665,6 +665,85 @@ Grafo *Grafo::arvore_caminhamento_profundidade(int id_no)
     return new Grafo(visitados.size(), regras, vertices_arvore, arestas_arvore);
 }
 
+map<char, int> Grafo::calcular_excentricidades()
+{
+    const int INF = __INT_MAX__;
+    int n = lista_adj.size();
+    map<char, int> excentricidades;
+    
+    if (n == 0) 
+        return excentricidades;
+    
+    vector<char> indice_para_id(n);
+    map<char, int> id_para_indice;
+    
+    for (int i = 0; i < n; i++) {
+        char id = lista_adj[i]->getId();
+        indice_para_id[i] = id;
+        id_para_indice[id] = i;
+        excentricidades[id] = -1; // Inicializa como indefinido
+    }
+    
+    vector<vector<int>> dist(n, vector<int>(n, INF));
+    
+    for (int i = 0; i < n; i++) {
+        dist[i][i] = 0; // Distância de um nó para ele mesmo é 0
+        
+        for (Aresta *aresta : lista_adj[i]->getArestas()) {
+            int j = id_para_indice[aresta->getIdNoAlvo()];
+            dist[i][j] = aresta->getPeso();
+            
+            if (!in_direcionado) {
+                dist[j][i] = dist[i][j];
+            }
+        }
+    }
+    
+    //Floyd-Warshall com early termination
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            if (dist[i][k] == INF) continue; // Pula se não há caminho
+            
+            for (int j = 0; j < n; j++) {
+                if (dist[k][j] != INF && dist[i][k] + dist[k][j] < dist[i][j]) {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                }
+            }
+        }
+    }
+    
+    bool grafo_conectado = true;
+    for (int i = 0; i < n && grafo_conectado; i++) {
+        int excentricidade_atual = 0;
+        
+        for (int j = 0; j < n; j++) {
+            if (dist[i][j] == INF) {
+                grafo_conectado = false;
+                break;
+            }
+            
+            // Calcula excentricidade durante a verificação
+            if (i != j && dist[i][j] > excentricidade_atual) {
+                excentricidade_atual = dist[i][j];
+            }
+        }
+        
+        if (grafo_conectado) {
+            excentricidades[indice_para_id[i]] = excentricidade_atual;
+        }
+    }
+    
+    if (!grafo_conectado) {
+        cout << "Grafo nao e conectado - metricas indefinidas" << endl;
+        // Limpa excentricidades e retorna com valores -1
+        for (auto &par : excentricidades) {
+            par.second = -1;
+        }
+    }
+    
+    return excentricidades;
+}
+
 int Grafo::raio()
 {
     std::cout << "Metodo nao implementado" << endl;
