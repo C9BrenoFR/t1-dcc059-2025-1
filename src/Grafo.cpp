@@ -91,7 +91,7 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
     if (!inicio)
         return {};
 
-    unordered_set<char> visitados;  // Conjunto de nós visitados
+    unordered_set<char> visitados; // Conjunto de nós visitados
     stack<No *> pilha;
     pilha.push(inicio);
 
@@ -105,7 +105,7 @@ vector<char> Grafo::fecho_transitivo_direto(int id_no)
 
         visitados.insert(atual->getId());
 
-         // Percorre as arestas de saída
+        // Percorre as arestas de saída
         for (Aresta *aresta : atual->getArestas())
         {
             No *proximo = getNoPorId(aresta->getIdNoAlvo());
