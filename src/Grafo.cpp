@@ -799,14 +799,40 @@ int Grafo::diametro()
 
 vector<char> Grafo::centro()
 {
-    std::cout << "Metodo nao implementado" << endl;
-    return {};
+    int raio = this->raio();
+    vector<char> vertices_centro;
+    map<char, int> excentricidades = this->calcular_excentricidades();
+
+    if (raio== -1) {
+        return vertices_centro;
+    }
+
+    for (auto &par : excentricidades) {        
+        if (par.second == raio) {
+            vertices_centro.push_back(par.first);
+        }
+    }
+
+    return vertices_centro;
 }
 
 vector<char> Grafo::periferia()
 {
-    std::cout << "Metodo nao implementado" << endl;
-    return {};
+    int diametro = this->diametro();
+    vector<char> vertices_periferia;
+    map<char, int> excentricidades = this->calcular_excentricidades();
+
+    if (diametro == -1) {
+        return vertices_periferia;
+    }
+
+    for (auto &par : excentricidades) {        
+        if (par.second == diametro) {
+            vertices_periferia.push_back(par.first);
+        }
+    }
+
+    return vertices_periferia;
 }
 
 vector<char> Grafo::vertices_de_articulacao()

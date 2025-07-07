@@ -302,27 +302,52 @@ void Gerenciador::comandos(Grafo *grafo)
 
     case 'h':
     {
-        // map<char, int> excentricidades = grafo->calcular_excentricidades();
 
-        // for (auto &par : excentricidades) {
-        //     cout << "Vertice " << par.first << ": " << par.second << endl;
-        // }
+        int raio = grafo->raio();
+        int diametro = grafo->diametro();
+        vector<char> centro = grafo->centro();
+        vector<char> periferia = grafo->periferia();
 
-        if(grafo->raio() == -1){
+        if(raio == -1){
             cout << "Erro ao calcular o raio: grafo nao conectado.";
             break;
         }
-
-        cout << grafo->raio() << endl;
-
-        if(grafo->diametro() == -1){
+        
+        if(diametro == -1){
             cout << "Erro ao calcular o diametro: grafo nao conectado.";
             break;
         }
-
-        cout << grafo->diametro() << endl;
-
         
+        if (centro.empty()) {
+            cout << "Erro ao exibir os vertices de centro: grafo desconectado";
+            break;
+        }
+
+        if (centro.empty()) {
+            cout << "Erro ao exibir os vertices de centro: grafo desconectado";
+            break;
+        }
+
+        if (periferia.empty()) {
+            cout << "Erro ao exibir os vertices de periferia: grafo desconectado";
+            break;
+        }
+
+        cout << raio << endl;
+
+        cout << diametro << endl;
+
+        cout << centro[0];
+        for(int i = 1; i < centro.size(); i++){
+            cout << "," << centro[i];
+        }
+        cout << endl;
+
+        cout << periferia[0];
+        for(int i = 1; i < periferia.size(); i++){
+            cout << "," << periferia[i];
+        }
+        cout << endl;
 
         if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))
         {
