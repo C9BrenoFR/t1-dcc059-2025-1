@@ -305,21 +305,7 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
             break;
         }
 
-        cout << raio << endl;
-
-        cout << diametro << endl;
-
-        cout << centro[0];
-        for(int i = 1; i < centro.size(); i++){
-            cout << "," << centro[i];
-        }
-        cout << endl;
-
-        cout << periferia[0];
-        for(int i = 1; i < periferia.size(); i++){
-            cout << "," << periferia[i];
-        }
-        cout << endl;
+        imprimeFuncoesBasicas(raio, diametro, centro, periferia);
 
         if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))
         {
@@ -515,13 +501,11 @@ void Gerenciador::salvaListaAdj(Grafo *grafo, string caminho)
 
 void Gerenciador::imprimeVetorChar(vector<char> lista)
 {
-    for (int i = 0; i < lista.size(); i++)
-    {
-        cout << lista[i];
-        if (lista.size() - 1 == i)
-            cout << ",";
-    }
-    cout << endl;
+    cout << lista[0];
+        for(int i = 1; i < lista.size(); i++){
+            cout << "," << lista[i];
+        }
+        cout << endl;
 }
 
 void Gerenciador::salvaVetorChar(vector<char> lista, string caminho)
@@ -542,7 +526,7 @@ void Gerenciador::salvaVetorChar(vector<char> lista, string caminho)
     arquivo << endl;
 }
 
-void Gerenciador::imprimeExcentricidade(int raio, int diametro, vector<char> centro, vector<char> periferia)
+void Gerenciador::imprimeFuncoesBasicas(int raio, int diametro, vector<char> centro, vector<char> periferia)
 {
     cout << raio << endl
          << diametro << endl;

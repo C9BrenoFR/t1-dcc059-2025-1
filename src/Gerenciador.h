@@ -16,7 +16,7 @@ public:
     static void salvaListaAdj(Grafo *grafo, string caminho);
     static void imprimeVetorChar(vector<char> lista);
     static void salvaVetorChar(vector<char> lista, string caminho);
-    static void imprimeExcentricidade(int raio, int diametro, vector<char> centro, vector<char> periferia);
+    static void imprimeFuncoesBasicas(int raio, int diametro, vector<char> centro, vector<char> periferia);
     static void salvaExcentricidade(int raio, int diametro, vector<char> centro, vector<char> periferia, string caminho);
     static bool pergunta_imprimir_arquivo(string nome_arquivo);
 };
