@@ -7,6 +7,7 @@
 
 #include "No.h"
 #include <vector>
+#include <map>
 
 using namespace std;
 
