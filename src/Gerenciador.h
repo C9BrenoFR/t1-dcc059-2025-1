@@ -17,7 +17,7 @@ public:
     static void imprimeVetorChar(vector<char> lista);
     static void salvaVetorChar(vector<char> lista, string caminho);
     static void imprimeFuncoesBasicas(int raio, int diametro, vector<char> centro, vector<char> periferia);
-    static void salvaExcentricidade(int raio, int diametro, vector<char> centro, vector<char> periferia, string caminho);
+    static void salvaFuncoesBasicas(int raio, int diametro, vector<char> centro, vector<char> periferia, string caminho);
     static bool pergunta_imprimir_arquivo(string nome_arquivo);
 };
 

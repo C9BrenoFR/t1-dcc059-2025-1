@@ -309,7 +309,7 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
 
         if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))
         {
-            cout << "Metodo de impressao em arquivo nao implementado" << endl;
+            salvaFuncoesBasicas(raio, diametro, centro, periferia, "raio_diametro_centro_periferia.txt");
         }
 
         break;
@@ -510,18 +510,17 @@ void Gerenciador::imprimeVetorChar(vector<char> lista)
 
 void Gerenciador::salvaVetorChar(vector<char> lista, string caminho)
 {
-    ofstream arquivo(caminho);
+    ofstream arquivo(caminho, ios::app);
     if (!arquivo.is_open())
     {
         cout << "Erro ao abrir o arquivo " << caminho << " para escrita!" << endl;
         return;
     }
 
-    for (int i = 0; i < lista.size(); i++)
+    arquivo << lista[0];
+    for (int i = 1; i < lista.size(); i++)
     {
-        arquivo << lista[i];
-        if (lista.size() - 1 == i)
-            arquivo << ",";
+        arquivo << "," << lista[i];
     }
     arquivo << endl;
 }
@@ -534,7 +533,7 @@ void Gerenciador::imprimeFuncoesBasicas(int raio, int diametro, vector<char> cen
     imprimeVetorChar(periferia);
 }
 
-void Gerenciador::salvaExcentricidade(int raio, int diametro, vector<char> centro, vector<char> periferia, string caminho)
+void Gerenciador::salvaFuncoesBasicas(int raio, int diametro, vector<char> centro, vector<char> periferia, string caminho)
 {
     ofstream arquivo(caminho);
     if (!arquivo.is_open())
@@ -544,6 +543,7 @@ void Gerenciador::salvaExcentricidade(int raio, int diametro, vector<char> centr
     }
     arquivo << raio << endl
             << diametro << endl;
+    arquivo.close(); 
     salvaVetorChar(centro, caminho);
     salvaVetorChar(periferia, caminho);
 }
