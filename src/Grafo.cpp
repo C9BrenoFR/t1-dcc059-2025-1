@@ -721,22 +721,23 @@ map<char, int> Grafo::calcular_excentricidades()
     }
     
     bool grafo_conectado = true;
-    for (int i = 0; i < n && grafo_conectado; i++) {
+    for (int i = 0; i < n; i++) {
         int peso_vertice_origem = in_ponderado_vertice ? lista_adj[i]->getPeso() : 0;
 
         int excentricidade_atual = 0;
         for (int j = 0; j < n; j++) {
-            if (dist[i][j] == INF) {
+            if (!in_direcionado && dist[i][j] == INF) {
                 grafo_conectado = false;
                 break;
             }
-            if (i != j && dist[i][j] > excentricidade_atual) {
-                excentricidade_atual = dist[i][j];
-            }
+           if (dist[i][j] != INF && i != j && dist[i][j] > excentricidade_atual) {
+               excentricidade_atual = dist[i][j];
+           }
         }
 
-        if (grafo_conectado) {
-            excentricidade_atual += peso_vertice_origem;
+        if (grafo_conectado || in_direcionado) {
+            excentricidade_atual += 
+            (in_ponderado_vertice ? lista_adj[i]->getPeso() : 0);
             excentricidades[indice_para_id[i]] = excentricidade_atual;
         }
     }
