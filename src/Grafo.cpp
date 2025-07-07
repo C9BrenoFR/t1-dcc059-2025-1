@@ -755,14 +755,32 @@ map<char, int> Grafo::calcular_excentricidades()
 
 int Grafo::raio()
 {
-    std::cout << "Metodo nao implementado" << endl;
-    return 0;
+    map<char, int> excentricidades = this->calcular_excentricidades();
+    int raio = __INT_MAX__;
+
+    bool encontrou_valido = false;
+    
+    for (auto &par : excentricidades) {        
+        if (par.second != -1) {
+            if (par.second < raio) {
+                raio = par.second;
+                encontrou_valido = true;
+            }
+        }
+    }
+
+    if (!encontrou_valido) {
+        return -1;
+    }
+
+    return raio;
 }
 
 int Grafo::diametro()
 {
-    std::cout << "Metodo nao implementado" << endl;
-    return 0;
+    int diametro;
+
+    return diametro;
 }
 
 vector<char> Grafo::centro()

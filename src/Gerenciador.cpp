@@ -302,13 +302,20 @@ void Gerenciador::comandos(Grafo *grafo)
 
     case 'h':
     {
-        map<char, int> excentricidades = grafo->calcular_excentricidades();
+        // map<char, int> excentricidades = grafo->calcular_excentricidades();
 
-        cout << "Excentricidades dos vertices:" << endl;
-        for (auto &par : excentricidades) {
-            cout << "Vertice " << par.first << ": " << par.second << endl;
+        // for (auto &par : excentricidades) {
+        //     cout << "Vertice " << par.first << ": " << par.second << endl;
+        // }
+
+        if(grafo->raio() == -1){
+            cout << "Erro ao calcular o raio: grafo nao conectado.";
+            break;
         }
-        cout << endl;
+
+        cout << grafo->raio() << endl;
+
+        
 
         if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))
         {
