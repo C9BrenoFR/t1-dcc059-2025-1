@@ -315,6 +315,13 @@ void Gerenciador::comandos(Grafo *grafo)
 
         cout << grafo->raio() << endl;
 
+        if(grafo->diametro() == -1){
+            cout << "Erro ao calcular o diametro: grafo nao conectado.";
+            break;
+        }
+
+        cout << grafo->diametro() << endl;
+
         
 
         if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))

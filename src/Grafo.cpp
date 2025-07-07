@@ -757,7 +757,6 @@ int Grafo::raio()
 {
     map<char, int> excentricidades = this->calcular_excentricidades();
     int raio = __INT_MAX__;
-
     bool encontrou_valido = false;
     
     for (auto &par : excentricidades) {        
@@ -778,7 +777,22 @@ int Grafo::raio()
 
 int Grafo::diametro()
 {
-    int diametro;
+    map<char, int> excentricidades = this->calcular_excentricidades();
+    int diametro = 0;
+    bool encontrou_valido = false;
+
+    for (auto &par : excentricidades) {        
+        if (par.second != -1) {
+            if (par.second > diametro) {
+                diametro = par.second;
+                encontrou_valido = true;
+            }
+        }
+    }
+
+    if (!encontrou_valido) {
+        return -1;
+    }
 
     return diametro;
 }
