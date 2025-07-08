@@ -34,20 +34,13 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         }
         else
         {
-            for (char c : fecho_transitivo_direto)
-                cout << c << " ";
-            cout << endl;
+            imprimeVetorChar(fecho_transitivo_direto);
         }
         cout << endl;
 
         if (pergunta_imprimir_arquivo("fecho_trans_dir.txt"))
         {
-            ofstream arquivo("fecho_trans_dir.txt");
-            for (char c : fecho_transitivo_direto)
-                arquivo << c << " ";
-            arquivo.close();
-            cout << "Resultado salvo em fecho_trans_dir.txt" << endl
-                 << endl;
+            salvaVetorChar(fecho_transitivo_direto, pasta + "/fecho_trans_dir.txt");
         }
 
         break;
@@ -66,20 +59,13 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         }
         else
         {
-            for (char c : fecho_transitivo_indireto)
-                cout << c << " ";
-            cout << endl;
+            imprimeVetorChar(fecho_transitivo_indireto);
         }
         cout << endl;
 
         if (pergunta_imprimir_arquivo("fecho_trans_indir.txt"))
         {
-            ofstream arquivo("fecho_trans_indir.txt");
-            for (char c : fecho_transitivo_indireto)
-                arquivo << c << " ";
-            arquivo.close();
-            cout << "Resultado salvo em fecho_trans_indir.txt" << endl
-                 << endl;
+            salvaVetorChar(fecho_transitivo_indireto, pasta + "/fecho_trans_indir.txt");
         }
 
         break;
@@ -98,37 +84,12 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         }
         else
         {
-            cout << "Caminho mínimo de " << id_no_1 << " a " << id_no_2 << ": ";
-            for (char c : caminho_minimo_dijkstra)
-            {
-                cout << c;
-                if (c != id_no_2)
-                    cout << ",";
-            }
-            cout << endl
-                 << endl;
+            imprimeVetorChar(caminho_minimo_dijkstra);
         }
 
         if (pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt"))
         {
-            ofstream arquivo("caminho_minimo_dijkstra.txt");
-            if (arquivo.is_open())
-            {
-                for (char c : caminho_minimo_dijkstra)
-                {
-                    arquivo << c;
-                    if (c != id_no_2)
-                        arquivo << ",";
-                }
-                arquivo.close();
-                cout << "Resultado salvo em caminho_minimo_dijkstra.txt" << endl
-                     << endl;
-            }
-            else
-            {
-                cout << "Erro ao abrir o arquivo!" << endl
-                     << endl;
-            }
+            salvaVetorChar(caminho_minimo_dijkstra, pasta + "/caminho_minimo_dijkstra.txt");
         }
 
         break;
@@ -146,35 +107,12 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         }
         else
         {
-            cout << "Caminho mínimo de " << id_no_1 << " a " << id_no_2 << ": ";
-            for (char c : caminho_minimo_floyd)
-            {
-                cout << c;
-                if (c != id_no_2)
-                    cout << ",";
-            }
-            cout << endl
-                 << endl;
+            imprimeVetorChar(caminho_minimo_floyd);
         }
 
         if (pergunta_imprimir_arquivo("caminho_minimo_floyd.txt"))
         {
-            ofstream arquivo("caminho_minimo_floyd.txt");
-            if (arquivo.is_open())
-            {
-                for (char c : caminho_minimo_floyd)
-                {
-                    arquivo << c;
-                    if (c != id_no_2)
-                        arquivo << ",";
-                }
-                arquivo.close();
-                cout << "Resultado salvo em caminho_minimo_floyd.txt" << endl
-                     << endl;
-            }
-            else
-                cout << "Erro ao abrir o arquivo!" << endl
-                     << endl;
+            salvaVetorChar(caminho_minimo_floyd, pasta + "/caminho_minimo_floyd.txt");
         }
 
         break;
@@ -280,27 +218,32 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         vector<char> centro = grafo->centro();
         vector<char> periferia = grafo->periferia();
 
-        if(raio == -1){
+        if (raio == -1)
+        {
             cout << "Erro ao calcular o raio: grafo nao conectado.";
             break;
         }
-        
-        if(diametro == -1){
+
+        if (diametro == -1)
+        {
             cout << "Erro ao calcular o diametro: grafo nao conectado.";
             break;
         }
-        
-        if (centro.empty()) {
+
+        if (centro.empty())
+        {
             cout << "Erro ao exibir os vertices de centro: grafo desconectado";
             break;
         }
 
-        if (centro.empty()) {
+        if (centro.empty())
+        {
             cout << "Erro ao exibir os vertices de centro: grafo desconectado";
             break;
         }
 
-        if (periferia.empty()) {
+        if (periferia.empty())
+        {
             cout << "Erro ao exibir os vertices de periferia: grafo desconectado";
             break;
         }
@@ -309,7 +252,7 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
 
         if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))
         {
-            salvaFuncoesBasicas(raio, diametro, centro, periferia, "raio_diametro_centro_periferia.txt");
+            salvaFuncoesBasicas(raio, diametro, centro, periferia, pasta + "/raio_diametro_centro_periferia.txt");
         }
 
         break;
@@ -335,9 +278,9 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         exit(0);
     }
     default:
-        {
-            cout << "Opção inválida" << endl;
-        }
+    {
+        cout << "Opção inválida" << endl;
+    }
     }
 
     comandos(grafo, pasta);
@@ -502,10 +445,11 @@ void Gerenciador::salvaListaAdj(Grafo *grafo, string caminho)
 void Gerenciador::imprimeVetorChar(vector<char> lista)
 {
     cout << lista[0];
-        for(int i = 1; i < lista.size(); i++){
-            cout << "," << lista[i];
-        }
-        cout << endl;
+    for (int i = 1; i < lista.size(); i++)
+    {
+        cout << "," << lista[i];
+    }
+    cout << endl;
 }
 
 void Gerenciador::salvaVetorChar(vector<char> lista, string caminho)
@@ -543,7 +487,7 @@ void Gerenciador::salvaFuncoesBasicas(int raio, int diametro, vector<char> centr
     }
     arquivo << raio << endl
             << diametro << endl;
-    arquivo.close(); 
+    arquivo.close();
     salvaVetorChar(centro, caminho);
     salvaVetorChar(periferia, caminho);
 }
