@@ -8,6 +8,7 @@
 #include <map>
 #include <unordered_set>
 #include <algorithm>
+#include <functional>
 
 using namespace std;
 
@@ -461,53 +462,82 @@ Grafo *Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
     if (!in_ponderado_aresta)
         return nullptr;
 
-    // Ordena lista de arestas
+    // Ordena lista de arestas dos nós selecionados
     vector<Aresta *> lista_arestas_ordenadas = getListaArestaOrdenada(ids_nos);
 
-    // Cria grafo cópia sem arestas
+    // Cria grafo cópia apenas com os nós selecionados, sem arestas
     vector<No *> agm;
-    for (No *no_original : lista_adj)
+    for (char id : ids_nos)
     {
-        No *no_copia = new No(no_original->getId(), no_original->getPeso());
-        agm.push_back(no_copia);
+        No *no_original = getNoPorId(id);
+        if (no_original)
+        {
+            No *no_copia = new No(no_original->getId(), no_original->getPeso());
+            agm.push_back(no_copia);
+        }
     }
 
-    // Percorre todas as arestas ja ordenadas
-    vector<char> nos_encontrados;
+    // Union-Find para detectar ciclos
+    map<char, char> pai;
+
+    // Inicializa Union-Find - cada nó é pai de si mesmo
+    for (char id : ids_nos)
+    {
+        pai[id] = id;
+    }
+
+    // Função auxiliar para encontrar raiz com compressão de caminho
+    auto encontrar_raiz = [&pai](char x) -> char
+    {
+        char original = x;
+        while (pai[x] != x)
+        {
+            x = pai[x];
+        }
+        // Compressão de caminho
+        while (pai[original] != x)
+        {
+            char temp = pai[original];
+            pai[original] = x;
+            original = temp;
+        }
+        return x;
+    };
+
+    // Adiciona arestas sem formar ciclos
+    int arestas_adicionadas = 0;
     for (Aresta *aresta : lista_arestas_ordenadas)
     {
-        bool encontrou_origem = false, encontrou_alvo = false;
+        char origem = aresta->getIdNoOrigem();
+        char alvo = aresta->getIdNoAlvo();
 
-        // Checa se o nó ja foi encontrado
-        for (char no : nos_encontrados)
-        {
-            if (aresta->getIdNoOrigem() == no)
-                encontrou_origem = true;
-            else if (aresta->getIdNoAlvo() == no)
-                encontrou_alvo = true;
-        }
+        char raiz_origem = encontrar_raiz(origem);
+        char raiz_alvo = encontrar_raiz(alvo);
 
-        // Caso pelo menos um nó seja novo, salva aresta (dois nós novos geraria um ciclo)
-        if (!encontrou_origem || !encontrou_alvo)
+        // Se as raízes são diferentes, não há ciclo
+        if (raiz_origem != raiz_alvo)
         {
-            // Salva a aresta na respectiva origem.
+            // Une os conjuntos
+            pai[raiz_alvo] = raiz_origem;
+
+            // Encontra o nó de origem na AGM e adiciona a aresta
             for (No *no : agm)
             {
-                if (no->getId() == aresta->getIdNoOrigem())
+                if (no->getId() == origem)
                 {
-                    no->setAresta(aresta);
+                    no->setAresta(new Aresta(origem, alvo, aresta->getPeso()));
                     break;
                 }
             }
 
-            // Salva o novo nó na lista, sem repetições de nós
-            if (!encontrou_origem)
-                nos_encontrados.emplace_back(aresta->getIdNoOrigem());
-            if (!encontrou_alvo)
-                nos_encontrados.emplace_back(aresta->getIdNoAlvo());
+            arestas_adicionadas++;
+            // AGM completa quando tem n-1 arestas (n = número de nós)
+            if (arestas_adicionadas == ids_nos.size() - 1)
+                break;
         }
     }
-    return new Grafo(ordem, in_direcionado, in_ponderado_aresta, in_ponderado_vertice, agm);
+
+    return new Grafo(ids_nos.size(), in_direcionado, in_ponderado_aresta, in_ponderado_vertice, agm);
 }
 
 vector<Aresta *> Grafo::getListaArestaOrdenada(vector<char> ids_nos)
@@ -689,104 +719,120 @@ map<char, int> Grafo::calcular_excentricidades()
     const int INF = __INT_MAX__;
     int n = lista_adj.size();
     map<char, int> excentricidades;
-    
-    //Se nao existem vertices, retorna o mapa vazio
-    if (n == 0) 
+
+    // Se nao existem vertices, retorna o mapa vazio
+    if (n == 0)
         return excentricidades;
-    
-    //Vetores que guardarao indice->id e id->indice respectivamente
+
+    // Vetores que guardarao indice->id e id->indice respectivamente
     vector<char> indice_para_id(n);
     map<char, int> id_para_indice;
-    
+
     // Inicializa as estruturas de mapeamento de índices e excentricidades
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         char id = lista_adj[i]->getId();
         indice_para_id[i] = id;
         id_para_indice[id] = i;
         excentricidades[id] = -1; // Inicializa como indefinido
     }
-    
-    //Matriz de distâncias iniciais: dist[i][j] = INF se não houver aresta direta
+
+    // Matriz de distâncias iniciais: dist[i][j] = INF se não houver aresta direta
     vector<vector<int>> dist(n, vector<int>(n, INF));
-    
-    //Popula dist[][] com pesos de arestas (e de vértices nos destinos, se aplicável)
-    for (int i = 0; i < n; i++) {
-        //Peso do vertice de origrm considerado apenas se o grafo e ponderado nos vertices
+
+    // Popula dist[][] com pesos de arestas (e de vértices nos destinos, se aplicável)
+    for (int i = 0; i < n; i++)
+    {
+        // Peso do vertice de origrm considerado apenas se o grafo e ponderado nos vertices
         int peso_vertice_origem = in_ponderado_vertice ? lista_adj[i]->getPeso() : 0;
         dist[i][i] = 0;
 
-        //Para cada aresta saindo do vértice i
-        for (Aresta *aresta : lista_adj[i]->getArestas()) {
+        // Para cada aresta saindo do vértice i
+        for (Aresta *aresta : lista_adj[i]->getArestas())
+        {
             int j = id_para_indice[aresta->getIdNoAlvo()];
 
-            //Peso da aresta (se ponderado) ou 1 por padrão
+            // Peso da aresta (se ponderado) ou 1 por padrão
             int peso_aresta = in_ponderado_aresta ? aresta->getPeso() : 1;
             // Peso do vértice destino (se ponderado)
             int peso_vertice_destino = in_ponderado_vertice ? lista_adj[j]->getPeso() : 0;
-            
+
             dist[i][j] = peso_aresta + peso_vertice_destino;
-            
-            //Se o grafo não é direcionado, adiciona a aresta reversa
-            if (!in_direcionado) {
-                //Para grafos não direcionados, dist[j][i] deve usar peso do vértice i como destino
+
+            // Se o grafo não é direcionado, adiciona a aresta reversa
+            if (!in_direcionado)
+            {
+                // Para grafos não direcionados, dist[j][i] deve usar peso do vértice i como destino
                 dist[j][i] = peso_aresta + peso_vertice_origem;
             }
         }
     }
-    
-    //Floyd-Warshall com early termination para encontrar caminhos mínimos com melhor performance
-    for (int k = 0; k < n; k++) {
-        for (int i = 0; i < n; i++) {
-            if (dist[i][k] == INF) continue; //Se k não é alcançável a partir de i, pula
-            
-            //Se j é alcançável de k e passando por k melhora o caminho i->j, atualiza
-            for (int j = 0; j < n; j++) {
-                if (dist[k][j] != INF && dist[i][k] + dist[k][j] < dist[i][j]) {
+
+    // Floyd-Warshall com early termination para encontrar caminhos mínimos com melhor performance
+    for (int k = 0; k < n; k++)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            if (dist[i][k] == INF)
+                continue; // Se k não é alcançável a partir de i, pula
+
+            // Se j é alcançável de k e passando por k melhora o caminho i->j, atualiza
+            for (int j = 0; j < n; j++)
+            {
+                if (dist[k][j] != INF && dist[i][k] + dist[k][j] < dist[i][j])
+                {
                     dist[i][j] = dist[i][k] + dist[k][j];
                 }
             }
         }
     }
-    
+
     bool grafo_conectado = true;
 
-    //Calculo da excentricidade de cada vértice
-    for (int i = 0; i < n; i++) {
-        //Peso do vertice de origrm considerado apenas se o grafo e ponderado nos vertices
+    // Calculo da excentricidade de cada vértice
+    for (int i = 0; i < n; i++)
+    {
+        // Peso do vertice de origrm considerado apenas se o grafo e ponderado nos vertices
         int peso_vertice_origem = in_ponderado_vertice ? lista_adj[i]->getPeso() : 0;
 
         int excentricidade_atual = 0;
 
         // Encontra a maior distância do vértice i para todos os outros vértices
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < n; j++)
+        {
             // Se grafo é não direcionado e há INF => não é conectado
-            if (!in_direcionado && dist[i][j] == INF) {
+            if (!in_direcionado && dist[i][j] == INF)
+            {
                 grafo_conectado = false;
                 break;
             }
             // Atualiza a excentricidade com a maior distância encontrada
-            if (dist[i][j] != INF && i != j && dist[i][j] > excentricidade_atual) {
-               excentricidade_atual = dist[i][j];
+            if (dist[i][j] != INF && i != j && dist[i][j] > excentricidade_atual)
+            {
+                excentricidade_atual = dist[i][j];
             }
         }
 
-        //Se o grafo é conectado (ou direcionado), calcula a excentricidade final
-        if (grafo_conectado || in_direcionado) {
-            excentricidade_atual += 
-            (in_ponderado_vertice ? lista_adj[i]->getPeso() : 0);
+        // Se o grafo é conectado (ou direcionado), calcula a excentricidade final
+        if (grafo_conectado || in_direcionado)
+        {
+            excentricidade_atual +=
+                (in_ponderado_vertice ? lista_adj[i]->getPeso() : 0);
             excentricidades[indice_para_id[i]] = excentricidade_atual;
         }
     }
-    
+
     // Se o grafo não direcionado não era conectado, marca todos como indefinidos
-    if (!grafo_conectado) {
+    if (!grafo_conectado)
+    {
         cout << "Grafo nao e conectado - metricas indefinidas" << endl;
         // Limpa excentricidades e retorna com valores -1
-        for (auto &par : excentricidades) {
+        for (auto &par : excentricidades)
+        {
             par.second = -1;
         }
     }
-    
+
     return excentricidades;
 }
 
@@ -795,17 +841,21 @@ int Grafo::raio()
     map<char, int> excentricidades = this->calcular_excentricidades();
     int raio = __INT_MAX__;
     bool encontrou_valido = false;
-    
-    for (auto &par : excentricidades) {        
-        if (par.second != -1) {
-            if (par.second < raio) {
+
+    for (auto &par : excentricidades)
+    {
+        if (par.second != -1)
+        {
+            if (par.second < raio)
+            {
                 raio = par.second;
                 encontrou_valido = true;
             }
         }
     }
 
-    if (!encontrou_valido) {
+    if (!encontrou_valido)
+    {
         return -1;
     }
 
@@ -818,16 +868,20 @@ int Grafo::diametro()
     int diametro = 0;
     bool encontrou_valido = false;
 
-    for (auto &par : excentricidades) {        
-        if (par.second != -1) {
-            if (par.second > diametro) {
+    for (auto &par : excentricidades)
+    {
+        if (par.second != -1)
+        {
+            if (par.second > diametro)
+            {
                 diametro = par.second;
                 encontrou_valido = true;
             }
         }
     }
 
-    if (!encontrou_valido) {
+    if (!encontrou_valido)
+    {
         return -1;
     }
 
@@ -840,12 +894,15 @@ vector<char> Grafo::centro()
     vector<char> vertices_centro;
     map<char, int> excentricidades = this->calcular_excentricidades();
 
-    if (raio== -1) {
+    if (raio == -1)
+    {
         return vertices_centro;
     }
 
-    for (auto &par : excentricidades) {        
-        if (par.second == raio) {
+    for (auto &par : excentricidades)
+    {
+        if (par.second == raio)
+        {
             vertices_centro.push_back(par.first);
         }
     }
@@ -859,12 +916,15 @@ vector<char> Grafo::periferia()
     vector<char> vertices_periferia;
     map<char, int> excentricidades = this->calcular_excentricidades();
 
-    if (diametro == -1) {
+    if (diametro == -1)
+    {
         return vertices_periferia;
     }
 
-    for (auto &par : excentricidades) {        
-        if (par.second == diametro) {
+    for (auto &par : excentricidades)
+    {
+        if (par.second == diametro)
+        {
             vertices_periferia.push_back(par.first);
         }
     }
