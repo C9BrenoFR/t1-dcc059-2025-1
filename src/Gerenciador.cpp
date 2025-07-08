@@ -35,14 +35,13 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         else
         {
             imprimeVetorChar(fecho_transitivo_direto);
-        }
-        cout << endl;
+            cout << endl;
 
-        if (pergunta_imprimir_arquivo("fecho_trans_dir.txt"))
-        {
-            salvaVetorChar(fecho_transitivo_direto, pasta + "/fecho_trans_dir.txt");
+            if (pergunta_imprimir_arquivo("fecho_trans_dir.txt"))
+            {
+                salvaVetorChar(fecho_transitivo_direto, pasta + "/fecho_trans_dir.txt");
+            }
         }
-
         break;
     }
 
@@ -60,12 +59,12 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         else
         {
             imprimeVetorChar(fecho_transitivo_indireto);
-        }
-        cout << endl;
+            cout << endl;
 
-        if (pergunta_imprimir_arquivo("fecho_trans_indir.txt"))
-        {
-            salvaVetorChar(fecho_transitivo_indireto, pasta + "/fecho_trans_indir.txt");
+            if (pergunta_imprimir_arquivo("fecho_trans_indir.txt"))
+            {
+                salvaVetorChar(fecho_transitivo_indireto, pasta + "/fecho_trans_indir.txt");
+            }
         }
 
         break;
@@ -85,11 +84,11 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         else
         {
             imprimeVetorChar(caminho_minimo_dijkstra);
-        }
 
-        if (pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt"))
-        {
-            salvaVetorChar(caminho_minimo_dijkstra, pasta + "/caminho_minimo_dijkstra.txt");
+            if (pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt"))
+            {
+                salvaVetorChar(caminho_minimo_dijkstra, pasta + "/caminho_minimo_dijkstra.txt");
+            }
         }
 
         break;
@@ -108,11 +107,11 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         else
         {
             imprimeVetorChar(caminho_minimo_floyd);
-        }
 
-        if (pergunta_imprimir_arquivo("caminho_minimo_floyd.txt"))
-        {
-            salvaVetorChar(caminho_minimo_floyd, pasta + "/caminho_minimo_floyd.txt");
+            if (pergunta_imprimir_arquivo("caminho_minimo_floyd.txt"))
+            {
+                salvaVetorChar(caminho_minimo_floyd, pasta + "/caminho_minimo_floyd.txt");
+            }
         }
 
         break;
