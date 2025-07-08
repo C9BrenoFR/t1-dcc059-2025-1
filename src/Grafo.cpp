@@ -690,12 +690,15 @@ map<char, int> Grafo::calcular_excentricidades()
     int n = lista_adj.size();
     map<char, int> excentricidades;
     
+    //Se nao existem vertices, retorna o mapa vazio
     if (n == 0) 
         return excentricidades;
     
+    //Vetores que guardarao indice->id e id->indice respectivamente
     vector<char> indice_para_id(n);
     map<char, int> id_para_indice;
     
+    // Inicializa as estruturas de mapeamento de índices e excentricidades
     for (int i = 0; i < n; i++) {
         char id = lista_adj[i]->getId();
         indice_para_id[i] = id;
@@ -703,34 +706,40 @@ map<char, int> Grafo::calcular_excentricidades()
         excentricidades[id] = -1; // Inicializa como indefinido
     }
     
+    //Matriz de distâncias iniciais: dist[i][j] = INF se não houver aresta direta
     vector<vector<int>> dist(n, vector<int>(n, INF));
     
+    //Popula dist[][] com pesos de arestas (e de vértices nos destinos, se aplicável)
     for (int i = 0; i < n; i++) {
+        //Peso do vertice de origrm considerado apenas se o grafo e ponderado nos vertices
         int peso_vertice_origem = in_ponderado_vertice ? lista_adj[i]->getPeso() : 0;
         dist[i][i] = 0;
 
-
+        //Para cada aresta saindo do vértice i
         for (Aresta *aresta : lista_adj[i]->getArestas()) {
             int j = id_para_indice[aresta->getIdNoAlvo()];
 
+            //Peso da aresta (se ponderado) ou 1 por padrão
             int peso_aresta = in_ponderado_aresta ? aresta->getPeso() : 1;
+            // Peso do vértice destino (se ponderado)
             int peso_vertice_destino = in_ponderado_vertice ? lista_adj[j]->getPeso() : 0;
             
-            // Custo total: APENAS peso da aresta + peso do vértice destino
             dist[i][j] = peso_aresta + peso_vertice_destino;
             
+            //Se o grafo não é direcionado, adiciona a aresta reversa
             if (!in_direcionado) {
-                // Para grafos não direcionados, dist[j][i] deve usar peso do vértice i como destino
+                //Para grafos não direcionados, dist[j][i] deve usar peso do vértice i como destino
                 dist[j][i] = peso_aresta + peso_vertice_origem;
             }
         }
     }
     
-    //Floyd-Warshall com early termination
+    //Floyd-Warshall com early termination para encontrar caminhos mínimos com melhor performance
     for (int k = 0; k < n; k++) {
         for (int i = 0; i < n; i++) {
-            if (dist[i][k] == INF) continue; // Pula se não há caminho
+            if (dist[i][k] == INF) continue; //Se k não é alcançável a partir de i, pula
             
+            //Se j é alcançável de k e passando por k melhora o caminho i->j, atualiza
             for (int j = 0; j < n; j++) {
                 if (dist[k][j] != INF && dist[i][k] + dist[k][j] < dist[i][j]) {
                     dist[i][j] = dist[i][k] + dist[k][j];
@@ -740,20 +749,28 @@ map<char, int> Grafo::calcular_excentricidades()
     }
     
     bool grafo_conectado = true;
+
+    //Calculo da excentricidade de cada vértice
     for (int i = 0; i < n; i++) {
+        //Peso do vertice de origrm considerado apenas se o grafo e ponderado nos vertices
         int peso_vertice_origem = in_ponderado_vertice ? lista_adj[i]->getPeso() : 0;
 
         int excentricidade_atual = 0;
+
+        // Encontra a maior distância do vértice i para todos os outros vértices
         for (int j = 0; j < n; j++) {
+            // Se grafo é não direcionado e há INF => não é conectado
             if (!in_direcionado && dist[i][j] == INF) {
                 grafo_conectado = false;
                 break;
             }
-           if (dist[i][j] != INF && i != j && dist[i][j] > excentricidade_atual) {
+            // Atualiza a excentricidade com a maior distância encontrada
+            if (dist[i][j] != INF && i != j && dist[i][j] > excentricidade_atual) {
                excentricidade_atual = dist[i][j];
-           }
+            }
         }
 
+        //Se o grafo é conectado (ou direcionado), calcula a excentricidade final
         if (grafo_conectado || in_direcionado) {
             excentricidade_atual += 
             (in_ponderado_vertice ? lista_adj[i]->getPeso() : 0);
@@ -761,6 +778,7 @@ map<char, int> Grafo::calcular_excentricidades()
         }
     }
     
+    // Se o grafo não direcionado não era conectado, marca todos como indefinidos
     if (!grafo_conectado) {
         cout << "Grafo nao e conectado - metricas indefinidas" << endl;
         // Limpa excentricidades e retorna com valores -1
