@@ -12,9 +12,9 @@ if [ -z "$1" ]; then
 else
     echo "COMPILANDO..."
     cd src/
-    g++ *.cpp -o execGrupoX
+    g++ *.cpp -o execGrupo25
     echo "INICIANDO"
-    ./execGrupoX "$1"
-    rm execGrupoX
+    ./execGrupo25 "$1"
+    rm execGrupo25
     cd ../
 fi
