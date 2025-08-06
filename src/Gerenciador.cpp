@@ -14,6 +14,8 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
     cout << "(f) Arvore Geradora Minima (Algoritmo de Kruskal);" << endl;
     cout << "(g) Arvore de caminhamento em profundidade;" << endl;
     cout << "(h) Raio, diametro, centro e periferia do grafo;" << endl;
+    cout << "(i) Vertices de articulacao;" << endl;
+    cout << "(j) Conjunto Dominante Independente (guloso);" << endl;
     cout << "(0) Sair;" << endl
          << endl;
 
@@ -269,6 +271,23 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
             cout << "Metodo de impressao em arquivo nao implementado" << endl;
         }
 
+        break;
+    }
+
+    case 'j':
+    {
+        vector<char> conjunto_dominante = Guloso::conjunto_dominante_independente(grafo);
+        
+        if (conjunto_dominante.empty()) {
+            cout << "Nenhum conjunto dominante independente encontrado." << endl;
+        } else {
+            cout << "Conjunto Dominante Independente: ";
+            imprimeVetorChar(conjunto_dominante);
+            
+            if (pergunta_imprimir_arquivo("conjunto_dominante_independente.txt")) {
+                salvaVetorChar(conjunto_dominante, pasta + "/conjunto_dominante_independente.txt");
+            }
+        }
         break;
     }
 

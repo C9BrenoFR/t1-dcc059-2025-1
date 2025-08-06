@@ -43,6 +43,7 @@ public:
     vector<char> centro();                                          // h 3
     vector<char> periferia();                                       // h 4
     vector<char> vertices_de_articulacao();                         // i
+    vector<char> conjunto_dominante_independente_guloso();
 
     vector<No *> getListaAdj();
     int getOrdem();
