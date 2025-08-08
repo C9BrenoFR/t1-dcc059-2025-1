@@ -16,6 +16,7 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
     cout << "(h) Raio, diametro, centro e periferia do grafo;" << endl;
     cout << "(i) Vertices de articulacao;" << endl;
     cout << "(j) Conjunto Dominante Independente (guloso);" << endl;
+    cout << "(k) Conjunto Dominante Independente (GRASP);" << endl;
     cout << "(0) Sair;" << endl
          << endl;
 
@@ -286,6 +287,40 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
             
             if (pergunta_imprimir_arquivo("conjunto_dominante_independente.txt")) {
                 salvaVetorChar(conjunto_dominante, pasta + "/conjunto_dominante_independente.txt");
+            }
+        }
+        break;
+    }
+
+    case 'k':
+    {
+        cout << "Parametros do GRASP:" << endl;
+        cout << "Digite o numero maximo de iteracoes (padrao 100): ";
+        int max_iteracoes;
+        cin >> max_iteracoes;
+        if (max_iteracoes <= 0) max_iteracoes = 100;
+        
+        cout << "Digite o tamanho da Lista de Candidatos Restrita (padrao 3): ";
+        int tamanho_lrc;
+        cin >> tamanho_lrc;
+        if (tamanho_lrc <= 0) tamanho_lrc = 3;
+        
+        cout << "Aplicar busca local? (1=sim, 0=nao, padrao=sim): ";
+        int busca_local_input;
+        cin >> busca_local_input;
+        bool busca_local = (busca_local_input != 0);
+        
+        vector<char> conjunto_dominante_grasp = GRASP::conjunto_dominante_independente_grasp(
+            grafo, max_iteracoes, tamanho_lrc, busca_local);
+        
+        if (conjunto_dominante_grasp.empty()) {
+            cout << "Nenhum conjunto dominante independente encontrado com GRASP." << endl;
+        } else {
+            cout << "Conjunto Dominante Independente (GRASP): ";
+            imprimeVetorChar(conjunto_dominante_grasp);
+            
+            if (pergunta_imprimir_arquivo("conjunto_dominante_independente_grasp.txt")) {
+                salvaVetorChar(conjunto_dominante_grasp, pasta + "/conjunto_dominante_independente_grasp.txt");
             }
         }
         break;

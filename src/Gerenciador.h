@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Grafo.h"
 #include "Guloso.h"
+#include "GRASP.h"
 #include <algorithm>
 
 using namespace std;
