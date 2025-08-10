@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     {
         cout << WARNING << "Erro ao abrir " << nome_arquivo << " para leitura\n"
              << RESET;
-        cout << RED << "Digite apenas o nome do arquivo contido na pasta instancias_t2 ex:\n"
+        cout << RED << "Digite apenas o nome do arquivo contido na pasta instancias ex:\n"
              << RESET
              << YELLOW << "./execGrupoX grafo01.txt (Caso esteja compilando via g++)\n"
              << "./compile.sh grafo01.txt (Caso esteja compilando com o script)\n"

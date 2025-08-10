@@ -8,6 +8,8 @@ using namespace std;
 
 vector<char> Guloso::conjunto_dominante_independente(Grafo *grafo)
 {
+    auto inicio = chrono::high_resolution_clock::now();
+    
     if (grafo->getListaAdj().empty()) {
         cout << RED << "Grafo vazio!" << RESET << endl;
         return {};
@@ -23,8 +25,6 @@ vector<char> Guloso::conjunto_dominante_independente(Grafo *grafo)
 
     cout << CYAN << "Iniciando algoritmo guloso para Conjunto Dominante Independente..." << RESET << endl;
     cout << "Total de vertices: " << todos_os_vertices.size() << endl << endl;
-
-    auto inicio = chrono::high_resolution_clock::now();
 
     while (vertices_dominados.size() < todos_os_vertices.size()) {
         char melhor_candidato = '\0';
@@ -81,9 +81,8 @@ vector<char> Guloso::conjunto_dominante_independente(Grafo *grafo)
         cout << v << " ";
     }
     cout << RESET << endl;
-    
-    cout << CYAN << "Tempo de execucao: " << duracao.count() << " ms" << RESET << endl;
-    cout << GREEN << "Tamanho da solucao: " << conjunto_dominante.size() << " vertices" << RESET << endl;
+    cout << "Tamanho da solução: " << conjunto_dominante.size() << endl;
+    cout << "Tempo de execução: " << duracao.count() << " ms" << endl;
     
     return conjunto_dominante;
 }
