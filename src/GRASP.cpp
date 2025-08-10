@@ -8,7 +8,7 @@
 
 using namespace std;
 
-vector<char> GRASP::conjunto_dominante_independente_grasp(Grafo *grafo, int max_iteracoes, int tamanho_lrc, bool busca_local)
+vector<char> GRASP::conjunto_dominante_independente_grasp(Grafo *grafo, int max_iteracoes, int tamanho_lrc, double alpha, bool busca_local)
 {
     if (grafo->getListaAdj().empty())
     {
@@ -17,8 +17,10 @@ vector<char> GRASP::conjunto_dominante_independente_grasp(Grafo *grafo, int max_
     }
 
     cout << CYAN << "Iniciando algoritmo GRASP para Conjunto Dominante Independente..." << RESET << endl;
-    cout << "Parametros: max_iteracoes=" << max_iteracoes << ", tamanho_lrc=" << tamanho_lrc << ", busca_local=" << (busca_local ? "sim" : "nao") << endl
+    cout << "Parametros: max_iteracoes=" << max_iteracoes << ", tamanho_lrc=" << tamanho_lrc << ", alpha=" << alpha << ", busca_local=" << (busca_local ? "sim" : "nao") << endl
          << endl;
+
+    auto inicio = chrono::high_resolution_clock::now();
 
     vector<char> melhor_solucao;
     int melhor_tamanho = INT_MAX;
@@ -29,7 +31,7 @@ vector<char> GRASP::conjunto_dominante_independente_grasp(Grafo *grafo, int max_
     {
         cout << YELLOW << "Iteracao " << iteracao << "/" << max_iteracoes << ":" << RESET << endl;
 
-        vector<char> solucao_atual = construir_solucao_gulosa_randomizada(grafo, tamanho_lrc, gerador);
+        vector<char> solucao_atual = construir_solucao_gulosa_randomizada(grafo, tamanho_lrc, alpha, gerador);
 
         cout << "  Solucao construida com " << solucao_atual.size() << " vertices" << endl;
 
@@ -70,10 +72,16 @@ vector<char> GRASP::conjunto_dominante_independente_grasp(Grafo *grafo, int max_
         cout << RED << "Nenhuma solucao valida encontrada!" << RESET << endl;
     }
 
+    auto fim = chrono::high_resolution_clock::now();
+    auto duracao = chrono::duration_cast<chrono::milliseconds>(fim - inicio);
+    
+    cout << CYAN << "Tempo de execucao: " << duracao.count() << " ms" << RESET << endl;
+    cout << GREEN << "Tamanho da solucao: " << melhor_solucao.size() << " vertices" << RESET << endl;
+
     return melhor_solucao;
 }
 
-vector<char> GRASP::construir_solucao_gulosa_randomizada(Grafo *grafo, int tamanho_lrc, mt19937 &gerador)
+vector<char> GRASP::construir_solucao_gulosa_randomizada(Grafo *grafo, int tamanho_lrc, double alpha, mt19937 &gerador)
 {
     vector<char> conjunto_dominante;
     unordered_set<char> vertices_dominados;
@@ -86,7 +94,7 @@ vector<char> GRASP::construir_solucao_gulosa_randomizada(Grafo *grafo, int taman
 
     while (vertices_dominados.size() < todos_os_vertices.size())
     {
-        vector<Candidato> lrc = construir_lista_candidatos_restrita(grafo, vertices_dominados, conjunto_dominante, tamanho_lrc);
+        vector<Candidato> lrc = construir_lista_candidatos_restrita(grafo, vertices_dominados, conjunto_dominante, tamanho_lrc, alpha);
 
         if (lrc.empty())
         {
@@ -114,7 +122,8 @@ vector<char> GRASP::construir_solucao_gulosa_randomizada(Grafo *grafo, int taman
 vector<GRASP::Candidato> GRASP::construir_lista_candidatos_restrita(Grafo *grafo,
                                                                     const unordered_set<char> &vertices_dominados,
                                                                     const vector<char> &conjunto_atual,
-                                                                    int tamanho_lrc)
+                                                                    int tamanho_lrc,
+                                                                    double alpha)
 {
     vector<Candidato> todos_candidatos;
 
@@ -155,7 +164,7 @@ vector<GRASP::Candidato> GRASP::construir_lista_candidatos_restrita(Grafo *grafo
     int melhor_pontuacao = todos_candidatos[0].pontuacao;
     int pior_pontuacao = todos_candidatos.back().pontuacao;
     
-    double alpha = 0.3; 
+    // Usar o parâmetro alpha recebido
     int limite_pontuacao = melhor_pontuacao - (int)(alpha * (melhor_pontuacao - pior_pontuacao));
 
     for (const Candidato &candidato : todos_candidatos)

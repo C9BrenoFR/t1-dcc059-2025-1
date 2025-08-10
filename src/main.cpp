@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     vector<string> vertices, arestas;
     int ordem, linha_atual = 0;
 
-    nome_arquivo = "../instancias/" + nome_arquivo;
+    nome_arquivo = "../instancias_t2/" + nome_arquivo;
     ifstream arquivo(nome_arquivo);
 
     if (arquivo.is_open())
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     {
         cout << WARNING << "Erro ao abrir " << nome_arquivo << " para leitura\n"
              << RESET;
-        cout << RED << "Digite apenas o nome do arquivo contido na pasta instancias ex:\n"
+        cout << RED << "Digite apenas o nome do arquivo contido na pasta instancias_t2 ex:\n"
              << RESET
              << YELLOW << "./execGrupoX grafo01.txt (Caso esteja compilando via g++)\n"
              << "./compile.sh grafo01.txt (Caso esteja compilando com o script)\n"

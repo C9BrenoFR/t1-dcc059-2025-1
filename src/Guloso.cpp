@@ -2,6 +2,7 @@
 #include "colors.h"
 #include <iostream>
 #include <algorithm>
+#include <chrono>
 
 using namespace std;
 
@@ -22,6 +23,8 @@ vector<char> Guloso::conjunto_dominante_independente(Grafo *grafo)
 
     cout << CYAN << "Iniciando algoritmo guloso para Conjunto Dominante Independente..." << RESET << endl;
     cout << "Total de vertices: " << todos_os_vertices.size() << endl << endl;
+
+    auto inicio = chrono::high_resolution_clock::now();
 
     while (vertices_dominados.size() < todos_os_vertices.size()) {
         char melhor_candidato = '\0';
@@ -70,11 +73,17 @@ vector<char> Guloso::conjunto_dominante_independente(Grafo *grafo)
 
     sort(conjunto_dominante.begin(), conjunto_dominante.end());
     
+    auto fim = chrono::high_resolution_clock::now();
+    auto duracao = chrono::duration_cast<chrono::milliseconds>(fim - inicio);
+    
     cout << GREEN << "Conjunto Dominante Independente encontrado: ";
     for (char v : conjunto_dominante) {
         cout << v << " ";
     }
     cout << RESET << endl;
+    
+    cout << CYAN << "Tempo de execucao: " << duracao.count() << " ms" << RESET << endl;
+    cout << GREEN << "Tamanho da solucao: " << conjunto_dominante.size() << " vertices" << RESET << endl;
     
     return conjunto_dominante;
 }

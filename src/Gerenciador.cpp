@@ -295,15 +295,20 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
     case 'k':
     {
         cout << "Parametros do GRASP:" << endl;
-        cout << "Digite o numero maximo de iteracoes (padrao 100): ";
+        cout << "Digite o numero maximo de iteracoes: ";
         int max_iteracoes;
         cin >> max_iteracoes;
         if (max_iteracoes <= 0) max_iteracoes = 100;
         
-        cout << "Digite o tamanho da Lista de Candidatos Restrita (padrao 3): ";
+        cout << "Digite o tamanho da Lista de Candidatos Restrita: ";
         int tamanho_lrc;
         cin >> tamanho_lrc;
         if (tamanho_lrc <= 0) tamanho_lrc = 3;
+        
+        cout << "Digite o valor de alpha (0.0-1.0, ex: 0.1, 0.5, 0.9): ";
+        double alpha;
+        cin >> alpha;
+        if (alpha < 0.0 || alpha > 1.0) alpha = 0.3;
         
         cout << "Aplicar busca local? (1=sim, 0=nao, padrao=sim): ";
         int busca_local_input;
@@ -311,7 +316,7 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
         bool busca_local = (busca_local_input != 0);
         
         vector<char> conjunto_dominante_grasp = GRASP::conjunto_dominante_independente_grasp(
-            grafo, max_iteracoes, tamanho_lrc, busca_local);
+            grafo, max_iteracoes, tamanho_lrc, alpha, busca_local);
         
         if (conjunto_dominante_grasp.empty()) {
             cout << "Nenhum conjunto dominante independente encontrado com GRASP." << endl;
