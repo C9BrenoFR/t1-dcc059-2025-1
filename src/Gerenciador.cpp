@@ -17,6 +17,7 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
     cout << "(i) Vertices de articulacao;" << endl;
     cout << "(j) Conjunto Dominante Independente (guloso);" << endl;
     cout << "(k) Conjunto Dominante Independente (GRASP);" << endl;
+    cout << "(l) Conjunto Dominante Independente (Reativo);" << endl;
     cout << "(0) Sair;" << endl
          << endl;
 
@@ -326,6 +327,37 @@ void Gerenciador::comandos(Grafo *grafo, string pasta)
             
             if (pergunta_imprimir_arquivo("conjunto_dominante_independente_grasp.txt")) {
                 salvaVetorChar(conjunto_dominante_grasp, pasta + "/conjunto_dominante_independente_grasp.txt");
+            }
+        }
+        break;
+    }
+
+    case 'l':
+    {
+        cout << "Parametros do Algoritmo Reativo:" << endl;
+        cout << "Digite o numero maximo de iteracoes (minimo 300): ";
+        int max_iteracoes;
+        cin >> max_iteracoes;
+        if (max_iteracoes < 300) max_iteracoes = 300;
+        
+        cout << "Digite o tamanho do bloco base (30-50, padrao=40): ";
+        int tamanho_bloco;
+        cin >> tamanho_bloco;
+        if (tamanho_bloco < 30 || tamanho_bloco > 50) tamanho_bloco = 40;
+        
+        cout << "Aplicar busca local? (1=sim, 0=nao, padrao=sim): ";
+        int busca_local_input;
+        cin >> busca_local_input;
+        bool busca_local = (busca_local_input != 0);
+        
+        vector<char> conjunto_dominante_reativo = Reativo::conjunto_dominante_independente_reativo(
+            grafo, max_iteracoes, tamanho_bloco, busca_local);
+        
+        if (conjunto_dominante_reativo.empty()) {
+            cout << "Nenhum conjunto dominante independente encontrado com Reativo." << endl;
+        } else {
+            if (pergunta_imprimir_arquivo("conjunto_dominante_independente_reativo.txt")) {
+                salvaVetorChar(conjunto_dominante_reativo, pasta + "/conjunto_dominante_independente_reativo.txt");
             }
         }
         break;

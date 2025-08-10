@@ -5,6 +5,7 @@
 #include "Grafo.h"
 #include "Guloso.h"
 #include "GRASP.h"
+#include "Reativo.h"
 #include <algorithm>
 
 using namespace std;
