@@ -1,4 +1,5 @@
 #include "GRASP.h"
+#include "GrafoUtils.h"
 #include "colors.h"
 #include <iostream>
 #include <algorithm>
@@ -109,7 +110,7 @@ vector<char> GRASP::construir_solucao_gulosa_randomizada(Grafo *grafo, int taman
         conjunto_dominante.push_back(candidato_selecionado);
 
         vertices_dominados.insert(candidato_selecionado);
-        unordered_set<char> vizinhos = obter_vizinhos(grafo, candidato_selecionado);
+        unordered_set<char> vizinhos = GrafoUtils::obter_vizinhos(grafo, candidato_selecionado);
         for (char vizinho : vizinhos)
         {
             vertices_dominados.insert(vizinho);
@@ -136,12 +137,12 @@ vector<GRASP::Candidato> GRASP::construir_lista_candidatos_restrita(Grafo *grafo
             continue;
         }
 
-        if (!eh_independente(grafo, id_candidato, conjunto_atual))
+        if (!GrafoUtils::eh_independente(grafo, id_candidato, conjunto_atual))
         {
             continue;
         }
 
-        int pontuacao = contar_novos_dominados(grafo, id_candidato, vertices_dominados);
+        int pontuacao = GrafoUtils::contar_novos_dominados(grafo, id_candidato, vertices_dominados);
         todos_candidatos.emplace_back(id_candidato, pontuacao);
     }
 
@@ -298,7 +299,7 @@ bool GRASP::tentar_substituir_vertice(Grafo *grafo, vector<char> &conjunto, char
         conjunto_sem_antigo.erase(it);
     }
 
-    if (!eh_independente(grafo, novo, conjunto_sem_antigo))
+    if (!GrafoUtils::eh_independente(grafo, novo, conjunto_sem_antigo))
     {
         return false;
     }
@@ -334,7 +335,7 @@ bool GRASP::eh_conjunto_independente_valido(Grafo *grafo, const vector<char> &co
     {
         for (int j = i + 1; j < (int)conjunto.size(); j++)
         {
-            if (eh_adjacente(grafo, conjunto[i], conjunto[j]))
+            if (GrafoUtils::eh_adjacente(grafo, conjunto[i], conjunto[j]))
             {
                 return false;
             }
@@ -350,7 +351,7 @@ unordered_set<char> GRASP::obter_vertices_dominados(Grafo *grafo, const vector<c
     for (char vertice : conjunto)
     {
         dominados.insert(vertice);
-        unordered_set<char> vizinhos = obter_vizinhos(grafo, vertice);
+        unordered_set<char> vizinhos = GrafoUtils::obter_vizinhos(grafo, vertice);
         for (char vizinho : vizinhos)
         {
             dominados.insert(vizinho);
@@ -358,99 +359,4 @@ unordered_set<char> GRASP::obter_vertices_dominados(Grafo *grafo, const vector<c
     }
 
     return dominados;
-}
-
-bool GRASP::eh_adjacente(Grafo *grafo, char vertice1, char vertice2)
-{
-    No *no1 = grafo->getNoPorId(vertice1);
-    if (!no1)
-        return false;
-
-    for (Aresta *aresta : no1->getArestas())
-    {
-        if (aresta->getIdNoAlvo() == vertice2)
-        {
-            return true;
-        }
-    }
-
-    if (!grafo->getInDirecionado())
-    {
-        No *no2 = grafo->getNoPorId(vertice2);
-        if (!no2)
-            return false;
-
-        for (Aresta *aresta : no2->getArestas())
-        {
-            if (aresta->getIdNoAlvo() == vertice1)
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-bool GRASP::eh_independente(Grafo *grafo, char candidato, const vector<char> &conjunto_dominante)
-{
-    for (char vertice_dominante : conjunto_dominante)
-    {
-        if (eh_adjacente(grafo, candidato, vertice_dominante))
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-int GRASP::contar_novos_dominados(Grafo *grafo, char candidato, const unordered_set<char> &vertices_dominados)
-{
-    int novos_dominados = 0;
-
-    if (vertices_dominados.find(candidato) == vertices_dominados.end())
-    {
-        novos_dominados++;
-    }
-
-    unordered_set<char> vizinhos = obter_vizinhos(grafo, candidato);
-    for (char vizinho : vizinhos)
-    {
-        if (vertices_dominados.find(vizinho) == vertices_dominados.end())
-        {
-            novos_dominados++;
-        }
-    }
-
-    return novos_dominados;
-}
-
-unordered_set<char> GRASP::obter_vizinhos(Grafo *grafo, char vertice)
-{
-    unordered_set<char> vizinhos;
-    No *no = grafo->getNoPorId(vertice);
-
-    if (!no)
-        return vizinhos;
-
-    for (Aresta *aresta : no->getArestas())
-    {
-        vizinhos.insert(aresta->getIdNoAlvo());
-    }
-
-    if (!grafo->getInDirecionado())
-    {
-        for (No *outro_no : grafo->getListaAdj())
-        {
-            for (Aresta *aresta : outro_no->getArestas())
-            {
-                if (aresta->getIdNoAlvo() == vertice)
-                {
-                    vizinhos.insert(outro_no->getId());
-                }
-            }
-        }
-    }
-
-    return vizinhos;
 }

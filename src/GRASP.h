@@ -2,6 +2,7 @@
 #define GRASP_H
 
 #include "Grafo.h"
+#include "GrafoUtils.h"
 #include <vector>
 #include <unordered_set>
 #include <random>
@@ -37,10 +38,6 @@ private:
     static bool eh_conjunto_dominante_valido(Grafo *grafo, const vector<char> &conjunto);
     static bool eh_conjunto_independente_valido(Grafo *grafo, const vector<char> &conjunto);
     static unordered_set<char> obter_vertices_dominados(Grafo *grafo, const vector<char> &conjunto);
-    static bool eh_adjacente(Grafo *grafo, char vertice1, char vertice2);
-    static bool eh_independente(Grafo *grafo, char candidato, const vector<char> &conjunto_dominante);
-    static int contar_novos_dominados(Grafo *grafo, char candidato, const unordered_set<char> &vertices_dominados);
-    static unordered_set<char> obter_vizinhos(Grafo *grafo, char vertice);
 };
 
 #endif // GRASP_H
